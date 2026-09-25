@@ -323,7 +323,7 @@ function renderArticles() {
         ).join('')}
                         </div>
                         <span class="text-indigo-400 text-sm font-medium whitespace-nowrap group-hover:translate-x-1 transition-transform">
-                            Ler mais <i class="fas fa-arrow-right text-xs ml-1"></i>
+                            Read more <i class="fas fa-arrow-right text-xs ml-1"></i>
                         </span>
                     </div>
                 `;
