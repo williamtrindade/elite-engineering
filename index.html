@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Engineering Blogs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body class="antialiased">
+
+<!-- Background Decorators -->
+<div class="bg-shape shape-1"></div>
+<div class="bg-shape shape-2"></div>
+<div class="bg-shape shape-3"></div>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+    <!-- Header & Search -->
+    <header class="flex flex-col items-center justify-center mb-12 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
+            Elite Engineering
+        </h1>
+        <p class="text-gray-400 mb-8 max-w-2xl text-sm md:text-base">
+            Curating the best engineering articles from industry-leading tech blogs.
+        </p>
+
+        <div class="relative w-full  glass rounded-full p-2 flex items-center">
+            <i class="fas fa-search text-gray-400 ml-4"></i>
+            <input type="text" id="searchInput" placeholder="Search for AI, ML, LLM..."
+                   class="w-full bg-transparent border-none text-white px-4 py-2 focus:outline-none placeholder-gray-500 rounded-full">
+            <button id="clearSearchBtn" class="hidden text-gray-400 hover:text-white mr-4 transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Company Filters -->
+    <div class="mb-12">
+        <h3 class="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-4 text-center">Filtrar por Empresa</h3>
+        <div id="filterContainer" class="flex flex-wrap justify-center gap-4">
+            <!-- Filters injected via JS -->
+        </div>
+    </div>
+
+    <!-- Content Area -->
+    <main>
+        <!-- Loading State -->
+        <div id="loadingState" class="flex flex-col items-center justify-center py-20">
+            <div class="loader mb-4"></div>
+            <p class="text-gray-400">A agregar artigos das fontes...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="hidden glass-panel border-red-500/30 text-center py-12 rounded-2xl max-w-2xl mx-auto">
+            <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
+            <h3 class="text-xl font-semibold mb-2">Ops! Algo correu mal.</h3>
+            <p class="text-gray-400 mb-4" id="errorMessage">Não foi possível carregar os feeds.</p>
+            <button onclick="initApp()" class="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors border border-white/20">
+                Tentar Novamente
+            </button>
+        </div>
+
+        <!-- Empty State (No results for search/filter) -->
+        <div id="emptyState" class="hidden text-center py-20">
+            <i class="fas fa-search-minus text-5xl text-gray-600 mb-4"></i>
+            <h3 class="text-xl text-gray-400">Nenhum artigo encontrado com estes critérios.</h3>
+        </div>
+
+        <!-- Articles Grid -->
+        <div id="articlesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+            <!-- Cards injected via JS -->
+        </div>
+    </main>
+</div>
+
+<script src="./script.js"></script>
+</body>
+</html>
