@@ -38,7 +38,7 @@
 
     <!-- Company Filters -->
     <div class="mb-12">
-        <h3 class="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-4 text-center">Filtrar por Empresa</h3>
+        <h3 class="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-4 text-center">Filter by company</h3>
         <div id="filterContainer" class="flex flex-wrap justify-center gap-4">
             <!-- Filters injected via JS -->
         </div>
@@ -49,14 +49,14 @@
         <!-- Loading State -->
         <div id="loadingState" class="flex flex-col items-center justify-center py-20">
             <div class="loader mb-4"></div>
-            <p class="text-gray-400">A agregar artigos das fontes...</p>
+            <p class="text-gray-400">Loading...</p>
         </div>
 
         <!-- Error State -->
         <div id="errorState" class="hidden glass-panel border-red-500/30 text-center py-12 rounded-2xl max-w-2xl mx-auto">
             <i class="fas fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-            <h3 class="text-xl font-semibold mb-2">Ops! Algo correu mal.</h3>
-            <p class="text-gray-400 mb-4" id="errorMessage">Não foi possível carregar os feeds.</p>
+            <h3 class="text-xl font-semibold mb-2">Ops! Something goes wrong</h3>
+            <p class="text-gray-400 mb-4" id="errorMessage">We couldn't load news</p>
             <button onclick="initApp()" class="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors border border-white/20">
                 Tentar Novamente
             </button>
@@ -65,7 +65,7 @@
         <!-- Empty State (No results for search/filter) -->
         <div id="emptyState" class="hidden text-center py-20">
             <i class="fas fa-search-minus text-5xl text-gray-600 mb-4"></i>
-            <h3 class="text-xl text-gray-400">Nenhum artigo encontrado com estes critérios.</h3>
+            <h3 class="text-xl text-gray-400">No articles found matching these criteria.</h3>
         </div>
 
         <!-- Articles Grid -->
