@@ -137,7 +137,7 @@ export class ReelsUI {
         const company = state.companies.find(c => c.id === article.companyId);
         Theme.apply(company?.color, this.DOM.overlay);
 
-        this.DOM.progress.textContent = `${this.currentIndex + 1} / ${this.articles.length} artigos`;
+        this.DOM.progress.textContent = `${this.currentIndex + 1} / ${this.articles.length} articles`;
         this.DOM.prevBtn.disabled = this.currentIndex === 0;
         this.DOM.nextBtn.disabled = this.currentIndex === this.articles.length - 1;
     }
@@ -147,7 +147,7 @@ export class ReelsUI {
         const companyName = Helper.escapeHtml(article.companyName);
         const excerpt = article.cleanDescription
             ? Helper.escapeHtml(article.cleanDescription)
-            : 'Nenhuma descrição disponível para este artigo.';
+            : 'No description available for this article.';
 
         const card = document.createElement('article');
         card.className = 'reels-card';
@@ -181,7 +181,7 @@ export class ReelsUI {
                     rel="noopener noreferrer"
                     class="reels-cta inline-flex items-center justify-center gap-2 w-full md:w-auto px-6 py-3 rounded-full text-white font-semibold"
                 >
-                    Ler artigo completo <i class="fas fa-arrow-up-right-from-square text-sm"></i>
+                    Read full article <i class="fas fa-arrow-up-right-from-square text-sm"></i>
                 </a>
             </div>
         `;

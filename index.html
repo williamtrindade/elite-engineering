@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -64,7 +64,7 @@
             <h3 class="text-xl font-semibold mb-2">Ops! Something goes wrong</h3>
             <p class="text-gray-400 mb-4" id="errorMessage">We couldn't load news</p>
             <button onclick="initApp()" class="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors border border-white/20">
-                Tentar Novamente
+                Try Again
             </button>
         </div>
 
@@ -82,23 +82,23 @@
 </div>
 
 <!-- Reels Mode (fullscreen, one article at a time) -->
-<div id="reelsOverlay" class="reels-overlay hidden" role="dialog" aria-modal="true" aria-label="Modo Reels">
+<div id="reelsOverlay" class="reels-overlay hidden" role="dialog" aria-modal="true" aria-label="Reels mode">
     <div class="reels-glow reels-glow-1"></div>
     <div class="reels-glow reels-glow-2"></div>
     <div id="reelsStage" class="reels-stage" aria-live="polite"></div>
 
     <div class="reels-topbar">
         <span id="reelsProgress" class="px-3 py-1 rounded-full glass text-xs md:text-sm text-gray-200 font-medium"></span>
-        <button id="reelsCloseBtn" class="reels-icon-btn glass" aria-label="Sair do modo Reels">
+        <button id="reelsCloseBtn" class="reels-icon-btn glass" aria-label="Exit Reels mode">
             <i class="fas fa-times"></i>
         </button>
     </div>
 
     <div class="reels-nav">
-        <button id="reelsPrevBtn" class="reels-icon-btn glass" aria-label="Artigo anterior">
+        <button id="reelsPrevBtn" class="reels-icon-btn glass" aria-label="Previous article">
             <i class="fas fa-chevron-up"></i>
         </button>
-        <button id="reelsNextBtn" class="reels-icon-btn glass" aria-label="Próximo artigo">
+        <button id="reelsNextBtn" class="reels-icon-btn glass" aria-label="Next article">
             <i class="fas fa-chevron-down"></i>
         </button>
     </div>
