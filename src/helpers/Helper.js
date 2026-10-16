@@ -5,6 +5,15 @@ export default class Helper {
         return text.replace(/\s+/g, ' ').trim(); // Remove extra whitespaces
     }
 
+    // Cut at a word boundary so excerpts don't end mid-word
+    static truncate(text, maxLength) {
+        if (text.length <= maxLength) return text;
+
+        const cut = text.slice(0, maxLength);
+        const lastSpace = cut.lastIndexOf(' ');
+        return `${(lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+    }
+
     static escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text ?? '';

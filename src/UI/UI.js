@@ -117,7 +117,7 @@ export class UI {
                     </h2>
 
                     <p class="text-gray-400 text-sm mb-4 line-clamp-3 flex-grow">
-                        ${Helper.escapeHtml(article.cleanDescription) || 'No description available for this article. Click to read it on the official site.'}
+                        ${Helper.escapeHtml(article.excerpt) || 'No description available for this article. Click to read it on the official site.'}
                     </p>
 
                     <div class="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">

@@ -18,15 +18,10 @@ export class FeedService {
 
                 feed.articles = rawData.items.map(item => new Article({
                     timestamp: new Date(item.pubDate).getTime(),
-                    author: item.author,
                     categories: item.categories,
-                    content: item.content,
-                    description: item.description,
-                    enclosure: item.enclosure,
-                    guid: item.guid,
+                    excerpt: item.excerpt,
                     link: item.link,
                     pubDate: item.pubDate,
-                    thumbnail: item.thumbnail,
                     title: item.title,
                     companyId: company.id,
                     companyName: company.name,

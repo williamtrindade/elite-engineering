@@ -145,8 +145,8 @@ export class ReelsUI {
     createCard(article) {
         const company = state.companies.find(c => c.id === article.companyId);
         const companyName = Helper.escapeHtml(article.companyName);
-        const excerpt = article.cleanDescription
-            ? Helper.escapeHtml(article.cleanDescription)
+        const excerpt = article.excerpt
+            ? Helper.escapeHtml(article.excerpt)
             : 'No description available for this article.';
 
         const card = document.createElement('article');

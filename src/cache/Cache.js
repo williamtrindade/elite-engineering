@@ -5,7 +5,22 @@ export default class Cache {
             data: data,
             expiry: now.getTime() + (ttlMinutes * 60 * 1000)
         };
-        localStorage.setItem(key, JSON.stringify(item));
+        try {
+            localStorage.setItem(key, JSON.stringify(item));
+        } catch (error) {
+            // Storage full or blocked: caching is optional, the data is still usable
+            console.warn(`Could not cache ${key}`, error);
+        }
+    }
+
+    static removeWhere(predicate) {
+        try {
+            Object.keys(localStorage)
+                .filter(predicate)
+                .forEach(key => localStorage.removeItem(key));
+        } catch (error) {
+            // localStorage unavailable (e.g. private mode): nothing to clean
+        }
     }
 
     static get(key) {
