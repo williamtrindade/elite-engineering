@@ -1,3 +1,5 @@
+import Helper from '../helpers/Helper.js';
+
 export class Article {
     constructor({author, categories, content, description, enclosure, guid, link, pubDate, thumbnail, title, companyId, companyName, timestamp}) {
         this.author = author;
@@ -14,6 +16,13 @@ export class Article {
         this.companyId = companyId;
         this.companyName = companyName;
     }
+    get cleanDescription() {
+        if (this._cleanDescription === undefined) {
+            this._cleanDescription = Helper.stripHtml(this.description || this.content || '');
+        }
+        return this._cleanDescription;
+    }
+
     get isNew() {
         if (!this.timestamp) return false;
 

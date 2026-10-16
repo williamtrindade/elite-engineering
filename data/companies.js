@@ -5,6 +5,7 @@ export const companiesList = [
     new Company({
         id: 'meta',
         name: 'Meta',
+        color: '#0866ff',
         domain: 'meta.com',
         logo: 'meta.png',
         feeds: [
@@ -14,6 +15,7 @@ export const companiesList = [
     new Company({
         id: 'apple',
         name: 'Apple',
+        color: '#a2aaad',
         logo: 'apple.png',
         feeds: [
             new Feed({ url: 'https://webkit.org/blog/feed/' }),
@@ -24,6 +26,7 @@ export const companiesList = [
     new Company({
         id: 'netflix',
         name: 'Netflix',
+        color: '#e50914',
         logo: 'netflix.png',
         feeds: [
             new Feed({ url: 'https://netflixtechblog.com/feed' })
@@ -32,6 +35,7 @@ export const companiesList = [
     new Company({
         id: 'google',
         name: 'Google',
+        color: '#4285f4',
         logo: 'google.png',
         feeds: [
             new Feed({ url: 'https://developers.googleblog.com/feeds/posts/default?alt=rss' })
@@ -40,6 +44,7 @@ export const companiesList = [
     new Company({
         id: 'amazon',
         name: 'Amazon',
+        color: '#ff9900',
         logo: 'amazon.png',
         feeds: [
             new Feed({ url: 'https://aws.amazon.com/blogs/architecture/feed/' })
@@ -48,6 +53,7 @@ export const companiesList = [
     new Company({
         id: 'microsoft',
         name: 'Microsoft',
+        color: '#00a4ef',
         logo: 'microsoft.png',
         feeds: [
             new Feed({ url: 'https://devblogs.microsoft.com/engineering-at-microsoft/feed/' })
@@ -56,6 +62,7 @@ export const companiesList = [
     new Company({
         id: 'ibm',
         name: 'IBM',
+        color: '#0f62fe',
         logo: 'ibm.png',
         feeds: [
             new Feed({ url: 'https://www.ibm.com/blog/feed/' })
@@ -64,6 +71,7 @@ export const companiesList = [
     new Company({
         id: 'dropbox',
         name: 'Dropbox',
+        color: '#0061ff',
         logo: 'dropbox.png',
         feeds: [
             new Feed({ url: 'https://dropbox.tech/feed' })
@@ -72,6 +80,7 @@ export const companiesList = [
     new Company({
         id: 'cloudflare',
         name: 'Cloudflare',
+        color: '#f38020',
         logo: 'cloudflare.png',
         feeds: [
             new Feed({ url: 'https://blog.cloudflare.com/rss/' })
@@ -80,6 +89,7 @@ export const companiesList = [
     new Company({
         id: 'spotify',
         name: 'Spotify',
+        color: '#1db954',
         logo: 'spotify.png',
         feeds: [
             new Feed({ url: 'https://engineering.atspotify.com/feed/' })
@@ -88,6 +98,7 @@ export const companiesList = [
     new Company({
         id: 'uber',
         name: 'Uber',
+        color: '#d1d5db',
         logo: 'uber.png',
         feeds: [
             new Feed({ url: 'https://rsshub.app/uber/blog' })
@@ -96,6 +107,7 @@ export const companiesList = [
     new Company({
         id: 'slack',
         name: 'Slack',
+        color: '#e01e5a',
         logo: 'slack.png',
         feeds: [
             new Feed({ url: 'https://slack.engineering/feed/' })
@@ -104,6 +116,7 @@ export const companiesList = [
     new Company({
         id: 'airbnb',
         name: 'Airbnb',
+        color: '#ff5a5f',
         logo: 'airbnb.png',
         feeds: [
             new Feed({ url: 'https://medium.com/feed/airbnb-engineering' })

@@ -16,10 +16,17 @@ body {
     filter: blur(80px);
     z-index: -1;
     animation: float 20s infinite alternate ease-in-out;
+    transition: background-color 1.2s ease;
 }
-.shape-1 { top: -10%; left: -10%; width: 40vw; height: 40vw; background: rgba(99, 102, 241, 0.3); }
-.shape-2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background: rgba(236, 72, 153, 0.2); }
-.shape-3 { top: 40%; left: 50%; width: 30vw; height: 30vw; background: rgba(16, 185, 129, 0.15); }
+/* --accent is set from JS (Theme.js) when filtering by company; unset = default palette */
+.shape-1 { top: -10%; left: -10%; width: 40vw; height: 40vw; background-color: color-mix(in srgb, var(--accent, rgb(99 102 241)) 30%, transparent); }
+.shape-2 { bottom: -10%; right: -10%; width: 50vw; height: 50vw; background-color: color-mix(in srgb, var(--accent, rgb(236 72 153)) 20%, transparent); }
+.shape-3 { top: 40%; left: 50%; width: 30vw; height: 30vw; background-color: color-mix(in srgb, var(--accent, rgb(16 185 129)) 15%, transparent); }
+
+.accent-text {
+    color: color-mix(in srgb, var(--accent, rgb(129 140 248)) 65%, white);
+    transition: color 1.2s ease;
+}
 
 @keyframes float {
     0% { transform: translate(0, 0) scale(1); }
@@ -123,4 +130,162 @@ body {
     width: 100%;
     height: 100%;
     object-fit: contain;
+}
+/* Reels mode */
+body.reels-open {
+    overflow: hidden;
+}
+
+.reels-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    height: 100dvh;
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    overflow: hidden;
+}
+
+/* Per-article glow: --accent is set on the overlay for each card */
+.reels-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+    transition: background-color 0.6s ease;
+}
+.reels-glow-1 {
+    top: -15%; left: -15%; width: 60vmax; height: 60vmax;
+    background-color: color-mix(in srgb, var(--accent, rgb(99 102 241)) 28%, transparent);
+}
+.reels-glow-2 {
+    bottom: -20%; right: -20%; width: 55vmax; height: 55vmax;
+    background-color: color-mix(in srgb, var(--accent, rgb(236 72 153)) 16%, transparent);
+}
+
+.reels-cta {
+    background-color: color-mix(in srgb, var(--accent, rgb(99 102 241)) 35%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent, rgb(99 102 241)) 70%, transparent);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+.reels-cta:hover {
+    background-color: color-mix(in srgb, var(--accent, rgb(99 102 241)) 55%, transparent);
+}
+
+.reels-stage {
+    position: absolute;
+    inset: 0;
+    touch-action: none; /* Swipes are handled in JS, don't let the page scroll */
+}
+
+.reels-card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4.5rem 1rem 6rem;
+}
+
+.reels-card-content {
+    width: 100%;
+    max-width: 42rem;
+    max-height: 100%;
+    padding: 2rem 1.5rem;
+    overflow: hidden;
+    /* Only the excerpt shrinks on short screens, so the CTA stays visible */
+    display: flex;
+    flex-direction: column;
+}
+.reels-card-content > * {
+    flex-shrink: 0;
+}
+.reels-card-content > .reels-excerpt {
+    flex-shrink: 1;
+    min-height: 0;
+}
+@media (min-width: 768px) {
+    .reels-card {
+        padding: 5rem 6rem;
+    }
+    .reels-card-content {
+        padding: 3rem;
+    }
+    .reels-card-content > a {
+        align-self: flex-start;
+    }
+}
+
+/* Short viewports (landscape phones, small windows): tighten spacing */
+@media (max-height: 600px) {
+    .reels-card {
+        padding-top: 4rem;
+        padding-bottom: 1rem;
+    }
+    .reels-card-content {
+        padding: 1.5rem 2rem;
+    }
+    .reels-card-content > * {
+        margin-bottom: 1rem !important;
+    }
+}
+
+.reels-excerpt {
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.reels-topbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    z-index: 1;
+}
+
+.reels-nav {
+    position: absolute;
+    z-index: 1;
+    display: flex;
+    gap: 0.75rem;
+    bottom: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+@media (min-width: 768px) {
+    .reels-nav {
+        flex-direction: column;
+        left: auto;
+        bottom: auto;
+        right: 1.5rem;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+}
+
+.reels-icon-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f8fafc;
+    cursor: pointer;
+    transition: background 0.2s ease, opacity 0.2s ease;
+}
+.reels-icon-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.12);
+}
+.reels-icon-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
 }

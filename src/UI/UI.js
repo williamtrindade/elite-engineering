@@ -1,5 +1,6 @@
 import { state } from '../state/StateSingleton.js';
 import Helper from "../helpers/Helper.js";
+import { Theme } from './Theme.js';
 
 export class UI {
      DOM = {
@@ -10,10 +11,15 @@ export class UI {
         loadingState: document.getElementById('loadingState'),
         errorState: document.getElementById('errorState'),
         emptyState: document.getElementById('emptyState'),
-        errorMessage: document.getElementById('errorMessage')
+        errorMessage: document.getElementById('errorMessage'),
+        reelsBtn: document.getElementById('reelsBtn')
     };
 
     refresh() {
+        if (state.isLoading || state.error) {
+            this.DOM.reelsBtn.disabled = true;
+        }
+
         if (state.isLoading) {
             this.DOM.loadingState.classList.remove('hidden');
             this.DOM.articlesGrid.classList.add('hidden');
@@ -37,6 +43,9 @@ export class UI {
     renderFilters() {
         const container = document.getElementById('filterContainer');
         container.innerHTML = '';
+
+        const activeCompany = state.companies.find(c => c.id === state.activeFilter);
+        Theme.apply(activeCompany?.color);
 
         state.companies.forEach(company => {
             const btn = document.createElement('button');
@@ -63,19 +72,8 @@ export class UI {
     renderArticles() {
         this.DOM.articlesGrid.innerHTML = '';
 
-        // Apply filters
-        let filteredArticles = state.allArticles;
-
-        if (state.activeFilter) {
-            filteredArticles = filteredArticles.filter(a => a.companyId === state.activeFilter);
-        }
-
-        if (state.searchQuery) {
-            const query = state.searchQuery.toLowerCase();
-            filteredArticles = filteredArticles.filter(a =>
-                a.title.toLowerCase().includes(query)
-            );
-        }
+        const filteredArticles = state.filteredArticles;
+        this.DOM.reelsBtn.disabled = filteredArticles.length === 0;
 
         // Handle empty results after filtering
         if (filteredArticles.length === 0) {
@@ -119,7 +117,7 @@ export class UI {
                     </h2>
 
                     <p class="text-gray-400 text-sm mb-4 line-clamp-3 flex-grow">
-                        ${article.cleanDescription || 'Nenhuma descrição disponível para este artigo. Clique para ler no site oficial.'}
+                        ${Helper.escapeHtml(article.cleanDescription) || 'Nenhuma descrição disponível para este artigo. Clique para ler no site oficial.'}
                     </p>
 
                     <div class="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
@@ -128,7 +126,7 @@ export class UI {
                                 `<span class="text-[10px] px-2 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 truncate">${cat}</span>`
                             ).join('')}
                         </div>
-                        <span class="text-indigo-400 text-sm font-medium whitespace-nowrap group-hover:translate-x-1 transition-transform">
+                        <span class="accent-text text-sm font-medium whitespace-nowrap group-hover:translate-x-1 transition-transform">
                             Read more <i class="fas fa-arrow-right text-xs ml-1"></i>
                         </span>
                     </div>

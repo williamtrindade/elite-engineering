@@ -35,6 +35,11 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
+
+        <button id="reelsBtn" disabled
+                class="mt-6 inline-flex items-center gap-2 px-6 py-2.5 rounded-full glass text-white font-medium hover:bg-white/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+            <i class="fas fa-film"></i> Reels
+        </button>
     </header>
 
     <!-- Company Filters -->
@@ -76,7 +81,28 @@
     </main>
 </div>
 
-<!-- ... existing code ... -->
+<!-- Reels Mode (fullscreen, one article at a time) -->
+<div id="reelsOverlay" class="reels-overlay hidden" role="dialog" aria-modal="true" aria-label="Modo Reels">
+    <div class="reels-glow reels-glow-1"></div>
+    <div class="reels-glow reels-glow-2"></div>
+    <div id="reelsStage" class="reels-stage" aria-live="polite"></div>
+
+    <div class="reels-topbar">
+        <span id="reelsProgress" class="px-3 py-1 rounded-full glass text-xs md:text-sm text-gray-200 font-medium"></span>
+        <button id="reelsCloseBtn" class="reels-icon-btn glass" aria-label="Sair do modo Reels">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <div class="reels-nav">
+        <button id="reelsPrevBtn" class="reels-icon-btn glass" aria-label="Artigo anterior">
+            <i class="fas fa-chevron-up"></i>
+        </button>
+        <button id="reelsNextBtn" class="reels-icon-btn glass" aria-label="Próximo artigo">
+            <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+</div>
 
 <script type="module" src="./script.js"></script>
 </body>

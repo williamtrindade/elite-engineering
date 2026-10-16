@@ -4,6 +4,7 @@ import { UI } from './src/UI/UI.js';
 import { AppController } from './src/controllers/AppController.js';
 import { Rss2JsonProvider } from './src/services/Rss2JsonProvider.js';
 import {FeedService} from './src/services/FeedService.js';
+import { ReelsUI } from './src/UI/ReelsUI.js';
 
 // Initialize Application
 async function initApp() {
@@ -50,3 +51,9 @@ ui.DOM.clearSearchBtn.addEventListener('click', () => {
     ui.DOM.clearSearchBtn.classList.add('hidden');
     ui.renderArticles();
 });
+
+/**
+ * Reels Mode
+ */
+const reels = new ReelsUI();
+ui.DOM.reelsBtn.addEventListener('click', () => reels.open());

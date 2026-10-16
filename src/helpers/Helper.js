@@ -5,6 +5,12 @@ export default class Helper {
         return text.replace(/\s+/g, ' ').trim(); // Remove extra whitespaces
     }
 
+    static escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text ?? '';
+        return div.innerHTML;
+    }
+
     static formatDate(dateString) {
         const options = { year: 'numeric', month: 'short', day: 'numeric' };
         const date = new Date(dateString);

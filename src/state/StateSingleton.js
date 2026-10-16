@@ -29,6 +29,22 @@ export class StateSingleton {
         this._allArticles = value;
     }
 
+    // Articles after applying the active company filter and search query
+    get filteredArticles() {
+        let articles = this._allArticles;
+
+        if (this._activeFilter) {
+            articles = articles.filter(a => a.companyId === this._activeFilter);
+        }
+
+        if (this._searchQuery) {
+            const query = this._searchQuery.toLowerCase();
+            articles = articles.filter(a => a.title.toLowerCase().includes(query));
+        }
+
+        return articles;
+    }
+
     get activeFilter() {
         return this._activeFilter;
     }
