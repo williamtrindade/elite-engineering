@@ -79,9 +79,13 @@ body {
     transition: all 0.2s ease;
     filter: grayscale(100%) opacity(0.6);
 }
-.company-filter:hover {
-    filter: grayscale(0%) opacity(1);
-    transform: scale(1.05);
+/* Only on real pointers: iOS Safari keeps :hover stuck on the last tapped element */
+@media (hover: hover) {
+    .company-filter:hover {
+        filter: grayscale(0%) opacity(1);
+        opacity: 1;
+        transform: scale(1.1);
+    }
 }
 .company-filter.active {
     filter: grayscale(0%) opacity(1);

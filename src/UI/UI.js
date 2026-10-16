@@ -51,7 +51,7 @@ export class UI {
             const btn = document.createElement('button');
             const isActive = state.activeFilter === company.id;
 
-            btn.className = `company-filter w-10 h-10 cursor-pointer transition-all flex justify-center items-center hover:opacity-100 hover:scale-110 ${isActive ? 'opacity-100 scale-110' : 'opacity-50'}`;
+            btn.className = `company-filter w-10 h-10 cursor-pointer transition-all flex justify-center items-center ${isActive ? 'opacity-100 scale-110' : 'opacity-50'}`;
 
             if (isActive) {
                 btn.classList.add('active');
