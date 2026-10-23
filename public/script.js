@@ -2,7 +2,7 @@ import { state } from './src/state/StateSingleton.js';
 import { companiesList } from './data/companies.js';
 import { UI } from './src/UI/UI.js';
 import { AppController } from './src/controllers/AppController.js';
-import { Rss2JsonProvider } from './src/services/Rss2JsonProvider.js';
+import { FeedProxyProvider } from './src/services/FeedProxyProvider.js';
 import {FeedService} from './src/services/FeedService.js';
 import { ReelsUI } from './src/UI/ReelsUI.js';
 
@@ -12,7 +12,7 @@ async function initApp() {
 
     state.companies = companiesList;
 
-    const feedProvider = new Rss2JsonProvider();
+    const feedProvider = new FeedProxyProvider();
     const feedService = new FeedService(feedProvider);
     const appController = new AppController(
         feedService,

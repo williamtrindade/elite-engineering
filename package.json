@@ -1,0 +1,15 @@
+{
+  "name": "elite-engineering",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes wrangler@4 pages dev public",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "linkedom": "^0.18.12"
+  },
+  "dependencies": {
+    "pino": "^9.14.0"
+  }
+}
