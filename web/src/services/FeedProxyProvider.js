@@ -1,5 +1,6 @@
 import Cache from '../cache/Cache.js';
 import Helper from '../helpers/Helper.js';
+import { API_BASE } from '../../config.js';
 
 // Bump when the cached shape changes, so stale entries are dropped
 const CACHE_PREFIX = 'articles_v3_';
@@ -7,7 +8,7 @@ const EXCERPT_LENGTH = 320;
 const MAX_CATEGORIES = 2;
 
 /**
- * Fetches feeds through our own Pages Function (functions/api/feed.js),
+ * Fetches feeds through our own API Worker (api/src/index.js),
  * which returns the raw XML, and parses RSS 2.0 / Atom in the browser.
  */
 export class FeedProxyProvider {
@@ -24,7 +25,7 @@ export class FeedProxyProvider {
             return cachedData;
         }
 
-        const response = await fetch(`/api/feed?url=${encodeURIComponent(url)}`);
+        const response = await fetch(`${API_BASE}/api/feed?url=${encodeURIComponent(url)}`);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);

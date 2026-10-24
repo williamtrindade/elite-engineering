@@ -16,7 +16,9 @@ before(async () => {
             return super.parseFromString(wrapped, type);
         }
     };
-    ({ parseFeed } = await import('../public/src/services/FeedProxyProvider.js'));
+    // config.js picks the API URL from the page's hostname
+    globalThis.location = new URL('http://localhost:8788/');
+    ({ parseFeed } = await import('../web/src/services/FeedProxyProvider.js'));
 });
 
 test('parses an RSS 2.0 feed', () => {
