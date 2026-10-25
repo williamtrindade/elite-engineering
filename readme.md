@@ -16,6 +16,40 @@ browser ──▶ web/ (Cloudflare Pages, static)
 - **`api/`** is a Worker that fetches the feeds on the browser's behalf, since blogs don't allow cross-origin requests. It only proxies the feeds listed in `web/data/companies.js`, caches them at the edge for 30 minutes, rejects requests from other origins, and logs every request with [pino](https://getpino.io).
 - **`web/config.js`** picks the API URL: `http://localhost:8787` when running locally, `https://elite-engineering-api.williamtrindade-dev.workers.dev` otherwise.
 
+## Article images
+
+Images are handled in two separate steps: finding the image's URL, then downloading the file.
+
+**1. Finding the URL: inside the feed XML, when the feed is parsed.** No extra request is made: the URL comes in the same XML the API already returns. `image()` in `src/services/FeedProxyProvider.js` looks, in this order, for:
+
+| # | Where in the item | Example feeds |
+|---|---|---|
+| 1 | `<media:content medium="image" url="…">` | Google Research, Dropbox |
+| 2 | `<media:thumbnail url="…">` | Google Research, Dropbox |
+| 3 | `<enclosure type="image/…" url="…">` (or an Atom `<link rel="enclosure">`) | Cloudflare |
+| 4 | first `<img src="…">` in the post HTML (`content:encoded`/`description`, or Atom `content`/`summary`) | Meta, Netflix, AWS, NVIDIA, Slack… |
+
+Step 4 skips `data:` placeholders and images declared smaller than 50px (icons, Medium's 1×1 tracking pixel). The URL is then resolved against the article link (relative paths), upgraded from `http` to `https`, and dropped if it uses any other scheme. If nothing is found, `image` is `''`. Some feeds (OpenAI, Hugging Face, Spotify, Apple ML, Google Developers) have no images at all.
+
+The URL is stored with the rest of the article, so it is cached in `localStorage` for 12 hours like everything else.
+
+**2. Downloading the file: by the browser, straight from the blog's server, when the card is about to be seen.** The API is not involved. `src/UI/ArticleMedia.js` creates the `<img>`:
+
+- in the grid with `loading="lazy"`: the browser only downloads images of cards near the viewport;
+- in Reels right away, plus the next card's image in the background (`preloadImage`) so a swipe shows it immediately.
+
+Downloaded files go to the browser's normal HTTP cache, for as long as each blog's `Cache-Control` allows (from 0 for Cloudflare up to a year for Meta). They are not stored in `localStorage`: a few images would exceed its ~5 MB limit.
+
+While an image loads, or when there is none, or it fails (404, hotlink blocking, an image under 120px wide), the card shows the company logo on its brand color.
+
+```
+page load ──▶ feed XML (via API) ──▶ parseFeed() finds the image URL ──▶ cached with the article
+                                                                              │
+card scrolls into view / Reels opens ──▶ browser downloads it from the blog ◀─┘
+                                              │
+                                    fails? ──▶ company logo stays
+```
+
 ## Project structure
 
 ```

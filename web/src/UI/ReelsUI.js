@@ -1,6 +1,7 @@
 import { state } from '../state/StateSingleton.js';
 import Helper from '../helpers/Helper.js';
 import { Theme } from './Theme.js';
+import { createArticleMedia, preloadImage } from './ArticleMedia.js';
 
 const SWIPE_THRESHOLD_PX = 50;
 const TRANSITION_MS = 350;
@@ -140,6 +141,9 @@ export class ReelsUI {
         this.DOM.progress.textContent = `${this.currentIndex + 1} / ${this.articles.length} articles`;
         this.DOM.prevBtn.disabled = this.currentIndex === 0;
         this.DOM.nextBtn.disabled = this.currentIndex === this.articles.length - 1;
+
+        // So the next swipe shows the image right away instead of the placeholder
+        preloadImage(this.articles[this.currentIndex + 1]?.image);
     }
 
     createCard(article) {
@@ -186,7 +190,11 @@ export class ReelsUI {
             </div>
         `;
 
+        // Grab the header logo before the media (which has its own <img>) is added
         const logo = card.querySelector('img');
+        card.querySelector('.reels-card-content')
+            .prepend(createArticleMedia(article, company, { className: 'reels-media', eager: true }));
+
         logo.addEventListener('error', () => {
             logo.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(article.companyName)}&background=random&color=fff&size=56&rounded=true`;
         }, { once: true });

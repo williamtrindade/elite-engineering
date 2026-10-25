@@ -92,8 +92,43 @@ test('reads Atom categories, summary and published', () => {
         link: 'https://example.com/post',
         pubDate: '2026-01-01T00:00:00Z',
         categories: ['a', 'b'],
-        excerpt: 'Short summary'
+        excerpt: 'Short summary',
+        image: ''
     });
+});
+
+const rssItem = inner => parseFeed(`<?xml version="1.0"?>
+    <rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+        <channel><title>Blog</title><item><title>Post</title><link>https://example.com/blog/post</link>${inner}</item></channel>
+    </rss>`).items[0];
+
+test('reads the cover image from Media RSS and image enclosures', () => {
+    assert.equal(rssItem('<media:content medium="image" url="https://cdn.example.com/a.png"/>').image, 'https://cdn.example.com/a.png');
+    assert.equal(rssItem('<media:thumbnail url="https://cdn.example.com/t.png"/>').image, 'https://cdn.example.com/t.png');
+    assert.equal(rssItem('<enclosure url="https://cdn.example.com/e.png" type="image/png" length="0"/>').image, 'https://cdn.example.com/e.png');
+    assert.equal(rssItem('<enclosure url="https://cdn.example.com/v.mp4" type="video/mp4" length="1"/>').image, '', 'video enclosures are not covers');
+});
+
+test('falls back to the first real <img> in the post body', () => {
+    const body = `<content:encoded><![CDATA[
+        <img src="data:image/gif;base64,R0lGOD" alt="">
+        <img src="https://example.com/emoji.png" width="16" height="16">
+        <p>Text</p><img src="/images/cover.jpg" alt="Cover">
+        <img src="https://medium.com/_/stat?event=post" width="1" height="1">
+    ]]></content:encoded>`;
+
+    assert.equal(rssItem(body).image, 'https://example.com/images/cover.jpg', 'relative src resolves against the article link');
+});
+
+test('upgrades http images and drops other schemes', () => {
+    assert.equal(rssItem('<media:thumbnail url="http://cdn.example.com/t.png"/>').image, 'https://cdn.example.com/t.png');
+    assert.equal(rssItem('<media:thumbnail url="javascript:alert(1)"/>').image, '');
+    assert.equal(rssItem('<description>No images here</description>').image, '');
+});
+
+test('finds images in the real feeds', () => {
+    assert.match(parseFeed(fixture('rss.xml')).items[0].image, /^https:\/\/blog\.cloudflare\.com\/.+\.png$/);
+    assert.match(parseFeed(fixture('rss-content-encoded.xml')).items[0].image, /^https:\/\/cdn-images-1\.medium\.com\//);
 });
 
 test('rejects documents that are not RSS or Atom', () => {

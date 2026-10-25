@@ -20,6 +20,7 @@ export class FeedService {
                     timestamp: new Date(item.pubDate).getTime(),
                     categories: item.categories,
                     excerpt: item.excerpt,
+                    image: item.image,
                     link: item.link,
                     pubDate: item.pubDate,
                     title: item.title,

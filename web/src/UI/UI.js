@@ -1,6 +1,7 @@
 import { state } from '../state/StateSingleton.js';
 import Helper from "../helpers/Helper.js";
 import { Theme } from './Theme.js';
+import { createArticleMedia } from './ArticleMedia.js';
 
 export class UI {
      DOM = {
@@ -87,7 +88,7 @@ export class UI {
 
         filteredArticles.forEach(article => {
             const card = document.createElement('article');
-            card.className = 'glass-panel glass-hover rounded-2xl p-6 flex flex-col h-full cursor-pointer';
+            card.className = 'article-card glass-panel glass-hover rounded-2xl overflow-hidden flex flex-col h-full cursor-pointer';
             card.onclick = () => window.open(article.link, '_blank');
 
             const foundCompany = state.companies.find(
@@ -97,7 +98,9 @@ export class UI {
             const newBadge = article.isNew
                 ? `<span class="inline-block bg-blue-600 text-white text-xs font-bold px-2 pt-[4px] pb-[2px] rounded ml-2 uppercase tracking-wide leading-none">NEW</span>`
                 : '';
-            card.innerHTML = `
+            const body = document.createElement('div');
+            body.className = 'p-6 flex flex-col flex-grow';
+            body.innerHTML = `
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
                             <img 
@@ -113,7 +116,7 @@ export class UI {
                     </div>
 
                     <h2 class="text-xl font-bold mb-3 text-white leading-tight group-hover:text-indigo-400 transition-colors">
-                        ${article.title}
+                        ${Helper.escapeHtml(article.title)}
                     </h2>
 
                     <p class="text-gray-400 text-sm mb-4 line-clamp-3 flex-grow">
@@ -123,7 +126,7 @@ export class UI {
                     <div class="mt-auto pt-4 border-t border-white/10 flex items-center justify-between">
                         <div class="flex gap-2 truncate pr-4">
                             ${(article.categories || []).slice(0, 2).map(cat =>
-                                `<span class="text-[10px] px-2 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 truncate">${cat}</span>`
+                                `<span class="text-[10px] px-2 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 truncate">${Helper.escapeHtml(cat)}</span>`
                             ).join('')}
                         </div>
                         <span class="accent-text text-sm font-medium whitespace-nowrap group-hover:translate-x-1 transition-transform">
@@ -131,6 +134,7 @@ export class UI {
                         </span>
                     </div>
                 `;
+            card.append(createArticleMedia(article, foundCompany, { className: 'aspect-video' }), body);
             this.DOM.articlesGrid.appendChild(card);
         });
     }

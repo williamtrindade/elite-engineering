@@ -3,7 +3,7 @@ import Helper from '../helpers/Helper.js';
 import { API_BASE } from '../../config.js';
 
 // Bump when the cached shape changes, so stale entries are dropped
-const CACHE_PREFIX = 'articles_v3_';
+const CACHE_PREFIX = 'articles_v4_';
 const EXCERPT_LENGTH = 320;
 const MAX_CATEGORIES = 2;
 
@@ -95,7 +95,9 @@ const RSS = {
         title: text(item, 'title'),
         link: text(item, 'link'),
         pubDate: text(item, 'pubDate'),
-        excerpt: excerpt(text(item, 'description') || text(item, 'content:encoded'))
+        excerpt: excerpt(text(item, 'description') || text(item, 'content:encoded')),
+        // The full post (content:encoded) is likelier to have an <img> than the summary
+        image: image(item, text(item, 'content:encoded') || text(item, 'description'), text(item, 'link'))
     })
 };
 
@@ -113,7 +115,8 @@ const ATOM = {
         title: text(entry, 'title'),
         link: alternateLink(entry),
         pubDate: text(entry, 'published') || text(entry, 'updated'),
-        excerpt: excerpt(text(entry, 'summary') || text(entry, 'content'))
+        excerpt: excerpt(text(entry, 'summary') || text(entry, 'content')),
+        image: image(entry, text(entry, 'content') || text(entry, 'summary'), alternateLink(entry))
     })
 };
 
@@ -142,4 +145,59 @@ function excerpt(html) {
     // Many feeds end their summary with a "[...]" / "[…]" marker
     const text = Helper.stripHtml(html).replace(/\s*\[(…|\.\.\.)\]$/, '');
     return Helper.truncate(text, EXCERPT_LENGTH);
+}
+
+/**
+ * Find the cover image URL of a feed item. Only reads the XML already downloaded:
+ * no request is made here, the browser downloads the file later (see UI/ArticleMedia.js).
+ *
+ * Looks, in this order, for:
+ *   1. <media:content medium="image" url="…">   (Google Research, Dropbox)
+ *   2. <media:thumbnail url="…">
+ *   3. <enclosure type="image/…" url="…">      (Cloudflare) or Atom <link rel="enclosure" href="…">
+ *   4. the first real <img src="…"> in the post HTML (Meta, Netflix, AWS, NVIDIA…)
+ *
+ * `el` is the <item>/<entry>, `html` the post body, `base` the article link for relative URLs.
+ * Returns an absolute https URL, or '' when the item has no image.
+ */
+function image(el, html, base) {
+    const media =
+        children(el, 'media:content').find(m => (m.getAttribute('medium') || m.getAttribute('type') || 'image').startsWith('image')) ||
+        child(el, 'media:thumbnail') ||
+        // Only image enclosures: AWS attaches .mp4 videos the same way
+        [...children(el, 'enclosure'), ...children(el, 'link').filter(link => link.getAttribute('rel') === 'enclosure')]
+            .find(enclosure => enclosure.getAttribute('type')?.startsWith('image/'));
+
+    // media:* and <enclosure> use url="…", Atom <link> uses href="…"
+    const url = media?.getAttribute('url') || media?.getAttribute('href') || firstImage(html);
+    return absoluteUrl(url, base);
+}
+
+function firstImage(html) {
+    if (!html || !html.includes('<img')) return '';
+
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const img = Array.from(doc.querySelectorAll('img')).find(img => {
+        const src = img.getAttribute('src') || '';
+        // Skip inline placeholders and tracking pixels / icons (Medium appends a 1x1 "stat" image)
+        const tiny = ['width', 'height'].some(attr => {
+            const size = parseInt(img.getAttribute(attr), 10);
+            return size > 0 && size < 50;
+        });
+        return src && !src.startsWith('data:') && !tiny;
+    });
+    return img?.getAttribute('src') || '';
+}
+
+// Relative URLs resolve against the article; http is upgraded so the https site doesn't get mixed content
+function absoluteUrl(url, base) {
+    if (!url) return '';
+
+    try {
+        const parsed = new URL(url, base || undefined);
+        if (parsed.protocol === 'http:') parsed.protocol = 'https:';
+        return parsed.protocol === 'https:' ? parsed.href : '';
+    } catch {
+        return '';
+    }
 }

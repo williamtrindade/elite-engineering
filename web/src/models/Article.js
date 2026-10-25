@@ -1,7 +1,8 @@
 export class Article {
-    constructor({categories, excerpt, link, pubDate, title, companyId, companyName, timestamp}) {
+    constructor({categories, excerpt, image, link, pubDate, title, companyId, companyName, timestamp}) {
         this.categories = categories;
         this.excerpt = excerpt;
+        this.image = image || '';
         this.link = link;
         this.pubDate = pubDate;
         this.title = title;

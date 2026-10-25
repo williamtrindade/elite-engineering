@@ -92,6 +92,73 @@ body {
 
 }
 
+/* Article cover (ArticleMedia.js): brand placeholder underneath, image fades in on top */
+.article-media {
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--media-color, rgb(99 102 241)) 45%, transparent), transparent 70%),
+        linear-gradient(135deg, color-mix(in srgb, var(--media-color, rgb(99 102 241)) 22%, #0f172a), #0f172a);
+}
+.article-media-logo {
+    width: 22%;
+    max-width: 4.5rem;
+    aspect-ratio: 1;
+    object-fit: contain;
+    opacity: 0.85;
+    filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.35));
+    transition: opacity 0.3s ease;
+}
+.article-media.is-loading .article-media-logo {
+    opacity: 0.25;
+}
+.article-media-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.article-media.is-loaded .article-media-img {
+    opacity: 1;
+}
+/* Diagrams on white backgrounds look harsh in a dark UI: blend a soft bottom fade into the card */
+.article-media.is-loaded::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.45), transparent 45%);
+    pointer-events: none;
+}
+/* Shimmer while the image downloads */
+.article-media.is-loading::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.08) 50%, transparent 70%);
+    background-size: 200% 100%;
+    animation: media-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes media-shimmer {
+    0% { background-position: 150% 0; }
+    100% { background-position: -50% 0; }
+}
+@media (hover: hover) {
+    .article-card:hover .article-media-img {
+        transform: scale(1.04);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .article-media.is-loading::before { animation: none; }
+    .article-media-img { transition: none; }
+}
+
 /* Line clamp for description */
 .line-clamp-3 {
     display: -webkit-box;
@@ -205,6 +272,13 @@ body.reels-open {
 .reels-card-content > * {
     flex-shrink: 0;
 }
+/* The cover gives up height before the text does on short screens */
+.reels-card-content > .reels-media {
+    height: min(32vh, 20rem);
+    min-height: 7rem;
+    flex-shrink: 1;
+    margin: -2rem -1.5rem 1.5rem;
+}
 .reels-card-content > .reels-excerpt {
     flex-shrink: 1;
     min-height: 0;
@@ -219,6 +293,9 @@ body.reels-open {
     .reels-card-content > a {
         align-self: flex-start;
     }
+    .reels-card-content > .reels-media {
+        margin: -3rem -3rem 2rem;
+    }
 }
 
 /* Short viewports (landscape phones, small windows): tighten spacing */
@@ -232,6 +309,16 @@ body.reels-open {
     }
     .reels-card-content > * {
         margin-bottom: 1rem !important;
+    }
+    .reels-card-content > .reels-media {
+        margin: -1.5rem -2rem 1rem !important;
+    }
+}
+
+/* Landscape phones: no room for a cover, the text matters more */
+@media (max-height: 520px) {
+    .reels-card-content > .reels-media {
+        display: none;
     }
 }
 
