@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "elite-engineering-api",
+  "main": "worker.js",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+  // Same keys as .env.example; secrets go in the dashboard or `wrangler secret put`, never here
+  "vars": {
+    "ALLOWED_ORIGINS": "https://elite-engineering.pages.dev,https://*.elite-engineering.pages.dev,http://localhost:*,http://127.0.0.1:*",
+    "FEED_CACHE_SECONDS": "1800",
+    // Must match ratelimits[0].simple below (checked by test/worker.test.js)
+    "RATE_LIMIT_REQUESTS": "60",
+    "RATE_LIMIT_PERIOD_SECONDS": "60",
+    "LOG_LEVEL": "info"
+  },
+  "ratelimits": [
+    {
+      // 60 requests per minute per IP; a full page load without cache makes one per feed
+      "name": "FEED_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 60, "period": 60 }
+    }
+  ]
+}

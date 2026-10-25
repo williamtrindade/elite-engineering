@@ -1,5 +1,5 @@
-import { Company } from '../src/models/Company.js';
-import { Feed } from '../src/models/Feed.js';
+import { Company } from '../src/core/Company.js';
+import { Feed } from '../src/core/Feed.js';
 
 export const companiesList = [
     new Company({
