@@ -57,7 +57,7 @@ curl -H "Origin: http://localhost:8788" "http://localhost:8787/api/feed?url=http
 
 This keeps other websites from using the API through their visitors' browsers. It is not authentication: a script can fake the `Origin` header.
 
-Each IP is also limited to 60 requests per minute (`ratelimits` in `api/wrangler.jsonc`); above that the API returns `429` with `Retry-After: 60`. A full page load without cache makes 15 requests, one per feed.
+Each IP is also limited to 60 requests per minute (`ratelimits` in `api/wrangler.jsonc`); above that the API returns `429` with `Retry-After: 60`. A full page load without cache makes 21 requests, one per feed.
 
 ## Tests
 

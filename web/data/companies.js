@@ -38,7 +38,10 @@ export const companiesList = [
         color: '#4285f4',
         logo: 'google.png',
         feeds: [
-            new Feed({ url: 'https://developers.googleblog.com/feeds/posts/default?alt=rss' })
+            new Feed({ url: 'https://developers.googleblog.com/feeds/posts/default?alt=rss' }),
+            // Both feeds carry 100 items going back years
+            new Feed({ url: 'https://deepmind.google/blog/rss.xml', limit: 15 }),
+            new Feed({ url: 'https://research.google/blog/rss/', limit: 15 })
         ],
     }),
     new Company({
@@ -131,6 +134,25 @@ export const companiesList = [
             // The main feed mixes product, company and policy news since 2015 (~1300 items)
             new Feed({ url: 'https://openai.com/news/rss.xml', categories: ['Engineering', 'Research', 'Security'], limit: 30 }),
             new Feed({ url: 'https://alignment.openai.com/rss.xml' })
+        ],
+    }),
+    new Company({
+        id: 'nvidia',
+        name: 'NVIDIA',
+        color: '#76b900',
+        logo: 'nvidia.png',
+        feeds: [
+            new Feed({ url: 'https://developer.nvidia.com/blog/feed/', limit: 20 })
+        ],
+    }),
+    new Company({
+        id: 'huggingface',
+        name: 'Hugging Face',
+        color: '#ffd21e',
+        logo: 'huggingface.png',
+        feeds: [
+            // The whole blog history (~900 items), community posts included
+            new Feed({ url: 'https://huggingface.co/blog/feed.xml', limit: 20 })
         ],
     })
 ];
