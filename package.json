@@ -4,9 +4,12 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently -n api,web -c blue,green \"npm run dev:api\" \"npm run dev:web\"",
-    "dev:api": "npm --prefix api run dev",
+    "dev:api": "node --env-file-if-exists=.env --watch api/platforms/node.js",
     "dev:web": "serve web -l 8788",
     "test": "node --test"
+  },
+  "dependencies": {
+    "pino": "^9.14.0"
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
