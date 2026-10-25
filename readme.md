@@ -128,7 +128,7 @@ Every environment setting is a variable, validated at startup by `api/src/config
 | `RATE_LIMIT_PERIOD_SECONDS` | required | Length of that period; also the `Retry-After` of a `429` |
 | `LOG_LEVEL` | `info` | pino level |
 
-- **Node:** `cp .env.example .env`. `.env` is git-ignored.
+- **Node:** `.env`, created from `.env.example` on the first `npm run dev`. It is git-ignored, so each clone has its own.
 - **Cloudflare:** the same keys are in `vars` in `api/platforms/cloudflare/wrangler.jsonc`. The rate limit binding can't read variables, so its `limit`/`period` are written in `ratelimits` too; a test fails if they differ from the vars. Secrets (future database or login keys) go in the dashboard or `wrangler secret put`, never in the repository.
 - **Front end:** it's static and public, so it has no `.env`. Its only setting is the API URL in `web/config.js`.
 
@@ -140,9 +140,10 @@ Requires Node.js 22+. No Cloudflare account or wrangler needed.
 
 ```bash
 npm install
-cp .env.example .env
 npm run dev
 ```
+
+The first `npm run dev` creates `.env` from `.env.example` if it doesn't exist; edit it to change ports, origins or limits.
 
 Open **http://localhost:8788**. `npm run dev` starts both servers:
 
