@@ -83,8 +83,6 @@
 
 <!-- Reels Mode (fullscreen, one article at a time) -->
 <div id="reelsOverlay" class="reels-overlay hidden" role="dialog" aria-modal="true" aria-label="Reels mode">
-    <div class="reels-glow reels-glow-1"></div>
-    <div class="reels-glow reels-glow-2"></div>
     <div id="reelsStage" class="reels-stage" aria-live="polite"></div>
 
     <div class="reels-topbar">
@@ -93,6 +91,8 @@
             <i class="fas fa-times"></i>
         </button>
     </div>
+
+    <div id="reelsToast" class="reels-toast glass" role="status" aria-live="polite"></div>
 
     <div class="reels-nav">
         <button id="reelsPrevBtn" class="reels-icon-btn glass" aria-label="Previous article">

@@ -5,12 +5,7 @@
 
 ## How it works
 
-```
-browser ──▶ web/ (Cloudflare Pages, static)
-   │
-   └──▶ GET /api/feed?url=<feed> ──▶ api/ (Cloudflare Worker) ──▶ company blog
-   ◀──────────── raw RSS/Atom XML ◀─────────┘
-```
+![generalArchitecture.svg](docs/diag/generalArchitecture.svg)
 
 - **`web/`** is the front end: plain HTML, CSS and ES modules, no build step. It parses RSS 2.0 and Atom in the browser (`src/services/FeedProxyProvider.js`) and caches the articles in `localStorage` for 12 hours.
 - **`api/`** is a Worker that fetches the feeds on the browser's behalf, since blogs don't allow cross-origin requests. It only proxies the feeds listed in `web/data/companies.js`, caches them at the edge for 30 minutes, rejects requests from other origins, and logs every request with [pino](https://getpino.io).
@@ -42,13 +37,25 @@ Downloaded files go to the browser's normal HTTP cache, for as long as each blog
 
 While an image loads, or when there is none, or it fails (404, hotlink blocking, an image under 120px wide), the card shows the company logo on its brand color.
 
-```
-page load ──▶ feed XML (via API) ──▶ parseFeed() finds the image URL ──▶ cached with the article
-                                                                              │
-card scrolls into view / Reels opens ──▶ browser downloads it from the blog ◀─┘
-                                              │
-                                    fails? ──▶ company logo stays
-```
+![articleImagesArchitecture.svg](docs/diag/articleImagesArchitecture.svg)
+
+---
+
+## Sharing an article
+
+The **Share** and **Copy** buttons in Reels send a link to our site, not to the blog, so whoever opens it sees the article in our Reels. Nothing is stored: the article's URL travels inside the link.
+
+1. **Share:** the article URL is encoded into the `reel` query param (`buildReelUrl()` in `src/helpers/ShareLink.js`):
+   `https://<our-site>/?reel=https%3A%2F%2Fnetflixtechblog.com%2Fbeyond-api-compatibility-...`
+2. **Open:** after the feeds load, `openSharedReel()` in `script.js` decodes the param (`parseReelParam()`) back into the article URL.
+3. **Find:** it looks for the article with that exact `link` in `state.allArticles`.
+4. **Show:** if found, Reels opens on it (browsing all articles if the active filter would hide it). If not (the post left the RSS feed, or the blog changed its URL), the param is dropped and the home page stays open.
+
+While browsing Reels, the address bar is kept on the current article's link, so it can be copied from there too; closing Reels removes the param.
+
+![sharingArchitecture.svg](docs/diag/sharingArchitecture.svg)
+
+--- 
 
 ## Project structure
 
@@ -56,11 +63,14 @@ card scrolls into view / Reels opens ──▶ browser downloads it from the blo
 web/                 front end (Cloudflare Pages)
   data/companies.js  companies and feed URLs (also the API's allowlist)
   config.js          API base URL
+  src/helpers/ShareLink.js  builds and reads shared Reels links (?reel=)
 api/                 feed proxy (Cloudflare Worker)
   src/index.js       request handler, allowlist, CORS
   wrangler.jsonc     Worker config
 test/                parser and API tests
 ```
+
+---
 
 ## Running locally
 
@@ -93,6 +103,8 @@ This keeps other websites from using the API through their visitors' browsers. I
 
 Each IP is also limited to 60 requests per minute (`ratelimits` in `api/wrangler.jsonc`); above that the API returns `429` with `Retry-After: 60`. A full page load without cache makes 21 requests, one per feed.
 
+--- 
+
 ## Tests
 
 ```bash
@@ -112,6 +124,8 @@ new Feed({ url: 'https://openai.com/news/rss.xml', categories: ['Engineering', '
 ```
 
 Categories match case-insensitively; items without a matching category are dropped.
+
+--- 
 
 ## Deployment
 

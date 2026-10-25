@@ -5,6 +5,7 @@ import { AppController } from './src/controllers/AppController.js';
 import { FeedProxyProvider } from './src/services/FeedProxyProvider.js';
 import {FeedService} from './src/services/FeedService.js';
 import { ReelsUI } from './src/UI/ReelsUI.js';
+import { parseReelParam } from './src/helpers/ShareLink.js';
 
 // Initialize Application
 async function initApp() {
@@ -21,6 +22,27 @@ async function initApp() {
 
     ui.renderFilters();
     await appController.fetchAllData();
+
+    openSharedReel();
+}
+
+/**
+ * Shared links (?reel=<article link>) open straight into Reels on that article.
+ * If it's no longer in the feeds, drop the param and stay on the home page.
+ */
+function openSharedReel() {
+    const sharedLink = parseReelParam();
+    if (!sharedLink) return;
+
+    const article = state.allArticles.find(a => a.link === sharedLink);
+
+    if (article) {
+        reels.open(article);
+    } else {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('reel');
+        history.replaceState(null, '', url);
+    }
 }
 
 // Start
