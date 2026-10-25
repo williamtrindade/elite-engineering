@@ -43,6 +43,8 @@ export class UI {
 
     renderFilters() {
         const container = document.getElementById('filterContainer');
+        // Re-rendering empties the row, which would snap the mobile scroll back to the start
+        const scrollLeft = container.scrollLeft;
         container.innerHTML = '';
 
         const activeCompany = state.companies.find(c => c.id === state.activeFilter);
@@ -68,6 +70,8 @@ export class UI {
 
             container.appendChild(btn);
         });
+
+        container.scrollLeft = scrollLeft;
     }
 
     renderArticles() {
