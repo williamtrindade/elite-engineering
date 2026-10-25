@@ -16,8 +16,10 @@ export class FeedProxyProvider {
         Cache.removeWhere(key => key.startsWith('articles_') && !key.startsWith(CACHE_PREFIX));
     }
 
-    async fetch(url) {
-        const cacheKey = `${CACHE_PREFIX}${url}`;
+    async fetch(url, options = {}) {
+        // The filter is part of the key, so changing it in companies.js isn't hidden by the cache
+        const filter = options.categories || options.limit ? JSON.stringify([options.categories, options.limit]) : '';
+        const cacheKey = `${CACHE_PREFIX}${url}${filter}`;
         const cachedData = Cache.get(cacheKey);
 
         if (cachedData) {
@@ -31,7 +33,7 @@ export class FeedProxyProvider {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = parseFeed(await response.text());
+        const data = parseFeed(await response.text(), options);
 
         Cache.set(cacheKey, data);
         console.log(`🌐 Web Request: ${url}`);
@@ -42,8 +44,11 @@ export class FeedProxyProvider {
 /**
  * Turn RSS 2.0 or Atom XML into the shape the UI uses. Only what the UI shows
  * is kept: users read the full article on the original site.
+ *
+ * `categories` keeps only items in any of them (case-insensitive) and `limit`
+ * caps how many are kept, for feeds that mix engineering posts with everything else.
  */
-export function parseFeed(xml) {
+export function parseFeed(xml, { categories, limit = Infinity } = {}) {
     const doc = new DOMParser().parseFromString(xml, 'text/xml');
 
     if (doc.getElementsByTagName('parsererror').length) {
@@ -51,57 +56,66 @@ export function parseFeed(xml) {
     }
 
     const root = doc.documentElement;
+    const format = { rss: RSS, feed: ATOM }[root?.tagName];
 
-    if (root?.tagName === 'rss') return parseRss(root);
-    if (root?.tagName === 'feed') return parseAtom(root);
+    if (!format) {
+        throw new Error(`Unrecognized feed format: <${root?.tagName}>`);
+    }
 
-    throw new Error(`Unrecognized feed format: <${root?.tagName}>`);
-}
+    const container = format.container(root);
+    const wanted = categories && new Set(categories.map(category => category.toLowerCase()));
 
-function parseRss(root) {
-    const channel = child(root, 'channel');
+    // Filter before building items: excerpts are the costly part and big feeds have hundreds of entries
+    const entries = format.entries(container)
+        .map(el => ({ el, categories: format.categories(el) }))
+        .filter(entry => !wanted || entry.categories.some(category => wanted.has(category.toLowerCase())))
+        .slice(0, limit);
 
     return {
         status: 'ok',
-        feed: {
-            title: text(channel, 'title'),
-            link: text(channel, 'link'),
-            description: text(channel, 'description'),
-            image: text(child(channel, 'image'), 'url')
-        },
-        items: children(channel, 'item').map(item => ({
-            title: text(item, 'title'),
-            link: text(item, 'link'),
-            pubDate: text(item, 'pubDate'),
-            categories: children(item, 'category')
-                .map(el => el.textContent.trim())
-                .slice(0, MAX_CATEGORIES),
-            excerpt: excerpt(text(item, 'description') || text(item, 'content:encoded'))
+        feed: format.feed(container),
+        items: entries.map(({ el, categories }) => ({
+            ...format.item(el),
+            categories: categories.slice(0, MAX_CATEGORIES)
         }))
     };
 }
 
-function parseAtom(root) {
-    return {
-        status: 'ok',
-        feed: {
-            title: text(root, 'title'),
-            link: alternateLink(root),
-            description: text(root, 'subtitle'),
-            image: text(root, 'logo') || text(root, 'icon')
-        },
-        items: children(root, 'entry').map(entry => ({
-            title: text(entry, 'title'),
-            link: alternateLink(entry),
-            pubDate: text(entry, 'published') || text(entry, 'updated'),
-            categories: children(entry, 'category')
-                .map(el => el.getAttribute('term'))
-                .filter(Boolean)
-                .slice(0, MAX_CATEGORIES),
-            excerpt: excerpt(text(entry, 'summary') || text(entry, 'content'))
-        }))
-    };
-}
+const RSS = {
+    container: root => child(root, 'channel'),
+    entries: channel => children(channel, 'item'),
+    categories: item => children(item, 'category').map(el => el.textContent.trim()).filter(Boolean),
+    feed: channel => ({
+        title: text(channel, 'title'),
+        link: text(channel, 'link'),
+        description: text(channel, 'description'),
+        image: text(child(channel, 'image'), 'url')
+    }),
+    item: item => ({
+        title: text(item, 'title'),
+        link: text(item, 'link'),
+        pubDate: text(item, 'pubDate'),
+        excerpt: excerpt(text(item, 'description') || text(item, 'content:encoded'))
+    })
+};
+
+const ATOM = {
+    container: root => root,
+    entries: root => children(root, 'entry'),
+    categories: entry => children(entry, 'category').map(el => el.getAttribute('term')).filter(Boolean),
+    feed: root => ({
+        title: text(root, 'title'),
+        link: alternateLink(root),
+        description: text(root, 'subtitle'),
+        image: text(root, 'logo') || text(root, 'icon')
+    }),
+    item: entry => ({
+        title: text(entry, 'title'),
+        link: alternateLink(entry),
+        pubDate: text(entry, 'published') || text(entry, 'updated'),
+        excerpt: excerpt(text(entry, 'summary') || text(entry, 'content'))
+    })
+};
 
 // A <link> without rel is "alternate" by the Atom spec
 function alternateLink(el) {

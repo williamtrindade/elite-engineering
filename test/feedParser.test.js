@@ -99,3 +99,31 @@ test('reads Atom categories, summary and published', () => {
 test('rejects documents that are not RSS or Atom', () => {
     assert.throws(() => parseFeed('<html><body>Just a moment...</body></html>'), /Unrecognized feed format/);
 });
+
+test('keeps only items in the given categories', () => {
+    const data = parseFeed(fixture('rss-categories.xml'), { categories: ['Engineering', 'Research'] });
+
+    assert.deepEqual(data.items.map(item => item.title), [
+        'Rapidly scaling online storage to serve over 1 billion ChatGPT users (Part II)',
+        'How we built ChatGPT’s novel ad stack for user trust and relevance'
+    ]);
+    assert.deepEqual(data.items[0].categories, ['Engineering']);
+});
+
+test('matches categories case-insensitively and drops uncategorized items', () => {
+    const data = parseFeed(fixture('rss-categories.xml'), { categories: ['security'] });
+
+    assert.equal(data.items.length, 2);
+    assert.ok(data.items.every(item => item.categories.includes('Security')));
+});
+
+test('limits the number of items after filtering', () => {
+    const all = parseFeed(fixture('rss-categories.xml'));
+    const limited = parseFeed(fixture('rss-categories.xml'), { limit: 5 });
+    const filteredAndLimited = parseFeed(fixture('rss-categories.xml'), { categories: ['Engineering'], limit: 1 });
+
+    assert.equal(all.items.length, 18);
+    assert.deepEqual(limited.items, all.items.slice(0, 5));
+    assert.equal(filteredAndLimited.items.length, 1);
+    assert.match(filteredAndLimited.items[0].title, /^Rapidly scaling online storage/);
+});

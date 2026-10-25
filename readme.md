@@ -71,6 +71,14 @@ Runs the feed parser tests against real RSS/Atom fixtures (`test/fixtures/`) and
 
 Add it to `web/data/companies.js` and its logo to `web/static/`. The API allowlist is built from the same file, so no API change is needed. Both projects must be deployed for the new feed to load.
 
+For feeds that mix engineering posts with everything else, a feed can keep only some categories and cap the number of items:
+
+```js
+new Feed({ url: 'https://openai.com/news/rss.xml', categories: ['Engineering', 'Research', 'Security'], limit: 30 })
+```
+
+Categories match case-insensitively; items without a matching category are dropped.
+
 ## Deployment
 
 Front end and API are two Cloudflare projects connected to this repository, each deployed on push:

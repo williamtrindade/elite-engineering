@@ -8,7 +8,7 @@ export class FeedService {
     async populateCompanyFeeds(company) {
         await Promise.all(company.feeds.map(async (feed) => {
             try {
-                const rawData = await this.provider.fetch(feed.url);
+                const rawData = await this.provider.fetch(feed.url, { categories: feed.categories, limit: feed.limit });
 
                 feed.title = rawData.feed.title || company.name;
                 feed.description = rawData.feed.description || "";

@@ -121,6 +121,17 @@ export const companiesList = [
         feeds: [
             new Feed({ url: 'https://medium.com/feed/airbnb-engineering' })
         ],
+    }),
+    new Company({
+        id: 'openai',
+        name: 'OpenAI',
+        color: '#10a37f',
+        logo: 'openai.png',
+        feeds: [
+            // The main feed mixes product, company and policy news since 2015 (~1300 items)
+            new Feed({ url: 'https://openai.com/news/rss.xml', categories: ['Engineering', 'Research', 'Security'], limit: 30 }),
+            new Feed({ url: 'https://alignment.openai.com/rss.xml' })
+        ],
     })
 ];
 

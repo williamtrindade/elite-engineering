@@ -39,7 +39,10 @@ export class StateSingleton {
 
         if (this._searchQuery) {
             const query = this._searchQuery.toLowerCase();
-            articles = articles.filter(a => a.title.toLowerCase().includes(query));
+            articles = articles.filter(a =>
+                a.title.toLowerCase().includes(query) ||
+                (a.excerpt || '').toLowerCase().includes(query)
+            );
         }
 
         return articles;
