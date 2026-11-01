@@ -2,6 +2,7 @@ import { state } from './state.js';
 import { escapeHtml, formatDate } from './format.js';
 import { Theme } from './Theme.js';
 import { createArticleMedia } from './ArticleMedia.js';
+import { createSponsorGridCard } from './SponsorCard.js';
 
 export class UI {
      DOM = {
@@ -9,6 +10,8 @@ export class UI {
         clearSearchBtn: document.getElementById('clearSearchBtn'),
         filterContainer: document.getElementById('filterContainer'),
         articlesGrid: document.getElementById('articlesGrid'),
+        featuredSection: document.getElementById('featuredSection'),
+        featuredGrid: document.getElementById('featuredGrid'),
         loadingState: document.getElementById('loadingState'),
         errorState: document.getElementById('errorState'),
         emptyState: document.getElementById('emptyState'),
@@ -24,6 +27,7 @@ export class UI {
         if (state.isLoading) {
             this.DOM.loadingState.classList.remove('hidden');
             this.DOM.articlesGrid.classList.add('hidden');
+            this.DOM.featuredSection.classList.add('hidden');
             this.DOM.errorState.classList.add('hidden');
             this.DOM.emptyState.classList.add('hidden');
             return;
@@ -80,6 +84,8 @@ export class UI {
         const filteredArticles = state.filteredArticles;
         this.DOM.reelsBtn.disabled = filteredArticles.length === 0;
 
+        this.renderFeatured();
+
         // Handle empty results after filtering
         if (filteredArticles.length === 0) {
             this.DOM.articlesGrid.classList.add('hidden');
@@ -87,10 +93,16 @@ export class UI {
             return;
         }
 
+        const gridItems = state.gridItems;
         this.DOM.emptyState.classList.add('hidden');
-        this.DOM.articlesGrid.classList.remove('hidden');
+        this.DOM.articlesGrid.classList.toggle('hidden', gridItems.length === 0);
 
-        filteredArticles.forEach(article => {
+        gridItems.forEach(article => {
+            if (article.isSponsored) {
+                this.DOM.articlesGrid.appendChild(createSponsorGridCard(article.sponsor));
+                return;
+            }
+
             const card = document.createElement('article');
             card.className = 'article-card glass-panel glass-hover rounded-2xl overflow-hidden flex flex-col h-full cursor-pointer';
             card.onclick = () => window.open(article.link, '_blank');
@@ -140,6 +152,44 @@ export class UI {
                 `;
             card.append(createArticleMedia(article, foundCompany, { className: 'aspect-video' }), body);
             this.DOM.articlesGrid.appendChild(card);
+        });
+    }
+
+    // Featured section above the grid: the first card is the large one (see .featured-grid)
+    renderFeatured() {
+        const featured = state.featuredArticles;
+        this.DOM.featuredGrid.innerHTML = '';
+        this.DOM.featuredSection.classList.toggle('hidden', featured.length === 0);
+
+        featured.forEach((article, index) => {
+            const company = state.companies.find(c => c.id === article.companyId);
+            const isMain = index === 0;
+
+            const card = document.createElement('a');
+            card.href = article.link;
+            card.target = '_blank';
+            card.rel = 'noopener';
+            card.className = `featured-card article-card glass-panel rounded-2xl ${isMain ? 'featured-card-main' : ''}`;
+
+            const body = document.createElement('div');
+            body.className = 'featured-body';
+            body.innerHTML = `
+                <div class="mb-2 text-xs">
+                    <span class="font-semibold text-gray-100 tracking-wide uppercase">${escapeHtml(article.companyName)}</span>
+                    <span class="text-gray-300 mx-1">&middot;</span>
+                    <span class="text-gray-300">${formatDate(article.pubDate)}</span>
+                </div>
+                <h3 class="${isMain ? 'text-2xl md:text-3xl' : 'text-lg'} font-bold text-white leading-tight">
+                    ${escapeHtml(article.title)}
+                </h3>
+                ${isMain && article.excerpt
+                    ? `<p class="hidden md:block text-gray-300 text-sm mt-3 line-clamp-2">${escapeHtml(article.excerpt)}</p>`
+                    : ''}
+            `;
+
+            // Grid images load lazily; these are at the top of the page, so fetch them right away
+            card.append(createArticleMedia(article, company, { className: 'featured-media', eager: true }), body);
+            this.DOM.featuredGrid.appendChild(card);
         });
     }
 }

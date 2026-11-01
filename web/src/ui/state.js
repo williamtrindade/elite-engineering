@@ -1,4 +1,9 @@
 import { filterArticles } from '../core/filterArticles.js';
+import { pickFeatured } from '../core/pickFeatured.js';
+import { placeSponsors } from '../core/sponsorSlots.js';
+
+// One sponsor slot after every AD_EVERY articles, in the grid and in Reels (see placeSponsors)
+export const AD_EVERY = 8;
 
 // Screen state: what is loaded and what the user picked (filter, search)
 export class StateSingleton {
@@ -7,6 +12,7 @@ export class StateSingleton {
             return StateSingleton._instance;
         }
         this._companies = [];
+        this.sponsors = [];
         this._allArticles = [];
         this._activeFilter = null;
         this._searchQuery = '';
@@ -35,6 +41,23 @@ export class StateSingleton {
     // Articles after applying the active company filter and search query
     get filteredArticles() {
         return filterArticles(this._allArticles, { companyId: this._activeFilter, query: this._searchQuery });
+    }
+
+    // Featured section: only on the home view; a filter or search shows just the grid
+    get featuredArticles() {
+        if (this._activeFilter || this._searchQuery) return [];
+        return pickFeatured(this._allArticles);
+    }
+
+    // The grid leaves out what the Featured section already shows (Reels still uses filteredArticles)
+    get gridArticles() {
+        const featured = new Set(this.featuredArticles);
+        return this.filteredArticles.filter(a => !featured.has(a));
+    }
+
+    // What the grid renders: its articles with the sponsor slots mixed in
+    get gridItems() {
+        return placeSponsors(this.gridArticles, this.sponsors, { placement: 'grid', every: AD_EVERY });
     }
 
     get activeFilter() {

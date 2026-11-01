@@ -2,6 +2,7 @@
 // Swapping an adapter (e.g. another FeedGateway) is a change here, nowhere else.
 import { API_BASE } from '../config.js';
 import { companiesList } from '../data/companies.js';
+import { sponsors } from '../data/sponsors.js';
 import { LoadArticles } from './core/LoadArticles.js';
 import { ApiFeedGateway } from './adapters/ApiFeedGateway.js';
 import { CachedFeedGateway } from './adapters/CachedFeedGateway.js';
@@ -10,7 +11,8 @@ import { state } from './ui/state.js';
 import { UI } from './ui/UI.js';
 import { AppController } from './ui/AppController.js';
 import { ReelsUI } from './ui/ReelsUI.js';
-import { parseReelParam } from './ui/ShareLink.js';
+import { parseReelParam, parseSearchParam } from './ui/ShareLink.js';
+import { initBackToTop } from './ui/BackToTop.js';
 
 const ui = new UI();
 const reels = new ReelsUI();
@@ -18,9 +20,14 @@ const reels = new ReelsUI();
 // Initialize Application
 async function initApp() {
     state.companies = companiesList;
+    state.sponsors = sponsors;
 
     const feedGateway = new CachedFeedGateway(new ApiFeedGateway(API_BASE), new LocalStorageStore());
     const appController = new AppController(new LoadArticles(feedGateway), ui);
+
+    const sharedQuery = parseSearchParam();
+    ui.DOM.searchInput.value = sharedQuery;
+    applySearch(sharedQuery);
 
     ui.renderFilters();
     await appController.fetchAllData();
@@ -51,14 +58,16 @@ function openSharedReel() {
 
 document.addEventListener('DOMContentLoaded', initApp);
 
-ui.DOM.searchInput.addEventListener('input', (e) => {
-    state.searchQuery = e.target.value.trim();
+/**
+ * Search links (?q=<query>) start with the search applied; the input keeps it in sync after that.
+ */
+function applySearch(query) {
+    state.searchQuery = query;
+    ui.DOM.clearSearchBtn.classList.toggle('hidden', query.length === 0);
+}
 
-    if(state.searchQuery.length > 0) {
-        ui.DOM.clearSearchBtn.classList.remove('hidden');
-    } else {
-        ui.DOM.clearSearchBtn.classList.add('hidden');
-    }
+ui.DOM.searchInput.addEventListener('input', (e) => {
+    applySearch(e.target.value.trim());
 
     // Render directly without full updateUI to avoid re-rendering filters unnecessarily
     ui.renderArticles();
@@ -78,3 +87,5 @@ ui.DOM.clearSearchBtn.addEventListener('click', () => {
  * Reels Mode
  */
 ui.DOM.reelsBtn.addEventListener('click', () => reels.open());
+
+initBackToTop(document.getElementById('backToTopBtn'));

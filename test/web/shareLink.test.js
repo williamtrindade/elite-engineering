@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { buildReelUrl, parseReelParam } from '../../web/src/ui/ShareLink.js';
+import { buildReelUrl, parseReelParam, parseSearchParam } from '../../web/src/ui/ShareLink.js';
 
 const articleLink = 'https://blog.cloudflare.com/post?id=1&lang=en#intro';
 
@@ -22,4 +22,10 @@ test('returns null when there is no reel param', () => {
     assert.equal(parseReelParam(''), null);
     assert.equal(parseReelParam('?q=php'), null);
     assert.equal(parseReelParam('?reel='), null);
+});
+
+test('reads the search query from ?q= (the WebSite SearchAction target)', () => {
+    assert.equal(parseSearchParam('?q=%20llm%20inference%20'), 'llm inference');
+    assert.equal(parseSearchParam('?reel=x'), '');
+    assert.equal(parseSearchParam(''), '');
 });

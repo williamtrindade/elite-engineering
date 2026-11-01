@@ -1,11 +1,16 @@
-import { state } from './state.js';
+import { state, AD_EVERY } from './state.js';
 import { escapeHtml, formatDate } from './format.js';
 import { Theme } from './Theme.js';
 import { createArticleMedia, preloadImage } from './ArticleMedia.js';
 import { buildReelUrl } from './ShareLink.js';
+import { dragOffset, shouldCommitSwipe, WheelStepper } from './reelsGestures.js';
+import { placeSponsors } from '../core/sponsorSlots.js';
+import { createSponsorReelsCard } from './SponsorCard.js';
 
-const SWIPE_THRESHOLD_PX = 50;
 const TRANSITION_MS = 350;
+const MIN_TRANSITION_MS = 150;
+const DRAG_DEAD_ZONE_PX = 8;
+const EASING = 'cubic-bezier(0.22, 1, 0.36, 1)';
 const TOAST_MS = 2000;
 
 export class ReelsUI {
@@ -19,11 +24,15 @@ export class ReelsUI {
         toast: document.getElementById('reelsToast')
     };
 
+    // Articles plus sponsor slots ({ isSponsored, sponsor }), in the order they are shown
     articles = [];
+    articleCount = 0;
     currentIndex = 0;
     currentCard = null;
     isAnimating = false;
-    touchStartY = null;
+    // Touch drag in progress: { startY, startTime, offset, direction, neighbor }
+    drag = null;
+    wheel = new WheelStepper();
     lastFocused = null;
     toastTimer = null;
 
@@ -32,21 +41,14 @@ export class ReelsUI {
         this.DOM.prevBtn.addEventListener('click', () => this.go(-1));
         this.DOM.nextBtn.addEventListener('click', () => this.go(1));
 
-        this.DOM.stage.addEventListener('touchstart', (e) => {
-            this.touchStartY = e.touches[0].clientY;
-        }, { passive: true });
+        // The card follows the finger; on release it moves on or snaps back (reelsGestures.js)
+        this.DOM.stage.addEventListener('touchstart', (e) => this.onDragStart(e), { passive: true });
+        this.DOM.stage.addEventListener('touchmove', (e) => this.onDragMove(e), { passive: true });
+        this.DOM.stage.addEventListener('touchend', () => this.onDragEnd());
+        this.DOM.stage.addEventListener('touchcancel', () => this.onDragEnd(true));
 
-        this.DOM.stage.addEventListener('touchend', (e) => {
-            if (this.touchStartY === null) return;
-
-            const deltaY = this.touchStartY - e.changedTouches[0].clientY;
-            this.touchStartY = null;
-
-            if (Math.abs(deltaY) < SWIPE_THRESHOLD_PX) return;
-
-            // Swipe up -> next article, swipe down -> previous
-            this.go(deltaY > 0 ? 1 : -1);
-        });
+        // Mouse wheel / trackpad: one card per gesture. Not passive, so the page behind doesn't scroll
+        this.DOM.overlay.addEventListener('wheel', (e) => this.onWheel(e), { passive: false });
 
         this.onKeyDown = this.onKeyDown.bind(this);
     }
@@ -64,9 +66,11 @@ export class ReelsUI {
         const source = !startArticle || state.filteredArticles.includes(startArticle)
             ? state.filteredArticles
             : state.allArticles;
-        this.articles = [...source].sort((a, b) => b.timestamp - a.timestamp);
+        const articles = [...source].sort((a, b) => b.timestamp - a.timestamp);
+        if (articles.length === 0) return;
 
-        if (this.articles.length === 0) return;
+        this.articles = placeSponsors(articles, state.sponsors, { placement: 'reels', every: AD_EVERY });
+        this.articleCount = articles.length;
 
         this.currentIndex = Math.max(0, this.articles.indexOf(startArticle));
         this.lastFocused = document.activeElement;
@@ -92,6 +96,7 @@ export class ReelsUI {
         this.DOM.stage.innerHTML = '';
         this.currentCard = null;
         this.isAnimating = false;
+        this.drag = null;
         this.hideToast();
 
         // Drop ?reel= so a reload lands on the home page
@@ -115,33 +120,123 @@ export class ReelsUI {
         }
     }
 
+    onWheel(e) {
+        e.preventDefault();
+
+        // Firefox may report lines instead of pixels
+        const deltaY = e.deltaMode === WheelEvent.DOM_DELTA_LINE ? e.deltaY * 16 : e.deltaY;
+        // Always fed, even mid-animation: otherwise trackpad inertia would look like a new gesture
+        const step = this.wheel.push(deltaY, e.timeStamp);
+        if (step && !this.isAnimating && !this.drag) this.go(step);
+    }
+
+    onDragStart(e) {
+        if (this.isAnimating || e.touches.length > 1) return;
+
+        this.drag = { startY: e.touches[0].clientY, startTime: e.timeStamp, offset: 0, direction: 0, neighbor: null };
+    }
+
+    onDragMove(e) {
+        const drag = this.drag;
+        if (!drag) return;
+
+        const delta = e.touches[0].clientY - drag.startY;
+        // A few px of jitter is still a tap (e.g. on Share), not a drag
+        if (!drag.direction && Math.abs(delta) < DRAG_DEAD_ZONE_PX) return;
+
+        // Dragging up brings the next card, dragging down the previous one
+        const direction = delta < 0 ? 1 : -1;
+
+        if (direction !== drag.direction) {
+            drag.neighbor?.remove();
+            const article = this.articles[this.currentIndex + direction];
+            drag.neighbor = article ? this.createCard(article) : null;
+            if (drag.neighbor) this.DOM.stage.appendChild(drag.neighbor);
+            drag.direction = direction;
+        }
+
+        drag.offset = dragOffset(delta, { hasNeighbor: Boolean(drag.neighbor) });
+        drag.time = e.timeStamp;
+
+        this.currentCard.style.transform = `translateY(${drag.offset}px)`;
+        if (drag.neighbor) {
+            drag.neighbor.style.transform = `translateY(calc(${direction * 100}% + ${drag.offset}px))`;
+        }
+    }
+
+    onDragEnd(cancelled = false) {
+        const drag = this.drag;
+        if (!drag) return;
+        this.drag = null;
+
+        if (!drag.direction) return; // A tap, not a drag
+
+        const velocity = Math.abs(drag.offset) / Math.max(1, (drag.time ?? drag.startTime) - drag.startTime);
+        const commit = !cancelled && drag.neighbor
+            && shouldCommitSwipe({ offset: drag.offset, velocity, height: this.DOM.stage.clientHeight });
+
+        if (commit) {
+            this.go(drag.direction, { incoming: drag.neighbor, offset: drag.offset });
+        } else {
+            this.snapBack(drag);
+        }
+    }
+
+    // Not far enough: the cards spring back to where they were
+    async snapBack({ offset, direction, neighbor }) {
+        this.isAnimating = true;
+        const current = this.currentCard;
+        const timing = this.timing(Math.abs(offset));
+
+        current.style.transform = '';
+        if (neighbor) neighbor.style.transform = `translateY(${direction * 100}%)`;
+
+        await Promise.all([
+            current.animate([{ transform: `translateY(${offset}px)` }, { transform: 'translateY(0)' }], timing).finished,
+            neighbor?.animate(
+                [{ transform: `translateY(calc(${direction * 100}% + ${offset}px))` }, { transform: `translateY(${direction * 100}%)` }],
+                timing
+            ).finished
+        ]).catch(() => {});
+
+        neighbor?.remove();
+        this.isAnimating = false;
+    }
+
     /**
-     * Slide to the next (direction = 1) or previous (direction = -1) article
+     * Slide to the next (direction = 1) or previous (direction = -1) article.
+     * After a drag, it continues from where the finger left the cards (`offset`, px)
+     * with the card that was already peeking in (`incoming`).
      */
-    async go(direction) {
+    async go(direction, { incoming = null, offset = 0 } = {}) {
         const nextIndex = this.currentIndex + direction;
 
-        if (this.isAnimating || nextIndex < 0 || nextIndex >= this.articles.length) return;
+        if (this.isAnimating || this.drag || nextIndex < 0 || nextIndex >= this.articles.length) return;
 
         this.isAnimating = true;
         this.currentIndex = nextIndex;
         this.updateControls();
 
         const outgoing = this.currentCard;
-        const incoming = this.createCard(this.articles[nextIndex]);
-        this.DOM.stage.appendChild(incoming);
+        if (!incoming) {
+            incoming = this.createCard(this.articles[nextIndex]);
+            this.DOM.stage.appendChild(incoming);
+        }
         this.currentCard = incoming;
 
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const timing = { duration: reduceMotion ? 0 : TRANSITION_MS, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' };
+        // Inline transforms from the drag: the end state is "out" for one, "in place" for the other
+        const remaining = this.DOM.stage.clientHeight - Math.abs(offset);
+        const timing = this.timing(remaining);
+        outgoing.style.transform = `translateY(${-direction * 100}%)`;
+        incoming.style.transform = '';
 
         await Promise.all([
             outgoing.animate(
-                [{ transform: 'translateY(0)' }, { transform: `translateY(${-direction * 100}%)` }],
+                [{ transform: `translateY(${offset}px)` }, { transform: `translateY(${-direction * 100}%)` }],
                 timing
             ).finished,
             incoming.animate(
-                [{ transform: `translateY(${direction * 100}%)` }, { transform: 'translateY(0)' }],
+                [{ transform: `translateY(calc(${direction * 100}% + ${offset}px))` }, { transform: 'translateY(0)' }],
                 timing
             ).finished
         ]).catch(() => {}); // Animations are cancelled if the overlay is closed mid-transition
@@ -150,20 +245,41 @@ export class ReelsUI {
         this.isAnimating = false;
     }
 
-    updateControls() {
-        const article = this.articles[this.currentIndex];
-        const company = state.companies.find(c => c.id === article.companyId);
-        Theme.apply(company?.color, this.DOM.overlay);
+    // Shorter distance left to travel = shorter animation, so a drag release doesn't feel sluggish
+    timing(distancePx) {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const fraction = Math.min(1, distancePx / Math.max(1, this.DOM.stage.clientHeight));
+        const duration = reduceMotion ? 0 : Math.max(MIN_TRANSITION_MS, TRANSITION_MS * fraction);
+        return { duration, easing: EASING };
+    }
 
-        this.DOM.progress.textContent = `${this.currentIndex + 1} / ${this.articles.length} articles`;
+    updateControls() {
+        const item = this.articles[this.currentIndex];
         this.DOM.prevBtn.disabled = this.currentIndex === 0;
         this.DOM.nextBtn.disabled = this.currentIndex === this.articles.length - 1;
 
-        // Keep the address bar pointing at the current article, so it can be copied from there too
-        history.replaceState(null, '', buildReelUrl(article.link));
+        if (item.isSponsored) {
+            Theme.apply(item.sponsor.color, this.DOM.overlay);
+            this.DOM.progress.textContent = 'Sponsored';
+            // Sponsor slots can't be shared: drop the article from the address bar
+            const url = new URL(window.location.href);
+            url.searchParams.delete('reel');
+            history.replaceState(null, '', url);
+        } else {
+            const company = state.companies.find(c => c.id === item.companyId);
+            Theme.apply(company?.color, this.DOM.overlay);
+
+            // The counter counts articles only, not sponsor slots
+            const position = this.articles.slice(0, this.currentIndex + 1).filter(i => !i.isSponsored).length;
+            this.DOM.progress.textContent = `${position} / ${this.articleCount} articles`;
+
+            // Keep the address bar pointing at the current article, so it can be copied from there too
+            history.replaceState(null, '', buildReelUrl(item.link));
+        }
 
         // So the next swipe shows the image right away instead of the placeholder
-        preloadImage(this.articles[this.currentIndex + 1]?.image);
+        const next = this.articles[this.currentIndex + 1];
+        preloadImage(next?.isSponsored ? next.sponsor.image : next?.image);
     }
 
     async share(article) {
@@ -203,7 +319,11 @@ export class ReelsUI {
         this.DOM.toast.classList.remove('is-visible');
     }
 
-    createCard(article) {
+    createCard(item) {
+        return item.isSponsored ? createSponsorReelsCard(item.sponsor) : this.createArticleCard(item);
+    }
+
+    createArticleCard(article) {
         const company = state.companies.find(c => c.id === article.companyId);
         const companyName = escapeHtml(article.companyName);
         const link = escapeHtml(article.link);

@@ -7,7 +7,7 @@ export const companiesList = [
         name: 'Meta',
         color: '#0866ff',
         domain: 'meta.com',
-        logo: 'meta.png',
+        logo: 'meta.webp',
         feeds: [
             new Feed({ url: 'https://engineering.fb.com/feed/' })
         ],
@@ -16,7 +16,7 @@ export const companiesList = [
         id: 'apple',
         name: 'Apple',
         color: '#a2aaad',
-        logo: 'apple.png',
+        logo: 'apple.webp',
         feeds: [
             new Feed({ url: 'https://webkit.org/blog/feed/' }),
             new Feed({ url: 'https://www.swift.org/atom.xml' }),
@@ -27,7 +27,7 @@ export const companiesList = [
         id: 'netflix',
         name: 'Netflix',
         color: '#e50914',
-        logo: 'netflix.png',
+        logo: 'netflix.webp',
         feeds: [
             new Feed({ url: 'https://netflixtechblog.com/feed' })
         ],
@@ -36,7 +36,7 @@ export const companiesList = [
         id: 'google',
         name: 'Google',
         color: '#4285f4',
-        logo: 'google.png',
+        logo: 'google.webp',
         feeds: [
             new Feed({ url: 'https://developers.googleblog.com/feeds/posts/default?alt=rss' }),
             // Both feeds carry 100 items going back years
@@ -48,7 +48,7 @@ export const companiesList = [
         id: 'amazon',
         name: 'Amazon',
         color: '#ff9900',
-        logo: 'amazon.png',
+        logo: 'amazon.webp',
         feeds: [
             new Feed({ url: 'https://aws.amazon.com/blogs/architecture/feed/' })
         ],
@@ -57,7 +57,7 @@ export const companiesList = [
         id: 'microsoft',
         name: 'Microsoft',
         color: '#00a4ef',
-        logo: 'microsoft.png',
+        logo: 'microsoft.webp',
         feeds: [
             new Feed({ url: 'https://devblogs.microsoft.com/engineering-at-microsoft/feed/' })
         ],
@@ -66,16 +66,16 @@ export const companiesList = [
         id: 'ibm',
         name: 'IBM',
         color: '#0f62fe',
-        logo: 'ibm.png',
+        logo: 'ibm.webp',
         feeds: [
-            new Feed({ url: 'https://www.ibm.com/blog/feed/' })
+            new Feed({ url: 'https://research.ibm.com/rss' })
         ],
     }),
     new Company({
         id: 'dropbox',
         name: 'Dropbox',
         color: '#0061ff',
-        logo: 'dropbox.png',
+        logo: 'dropbox.webp',
         feeds: [
             new Feed({ url: 'https://dropbox.tech/feed' })
         ],
@@ -84,7 +84,7 @@ export const companiesList = [
         id: 'cloudflare',
         name: 'Cloudflare',
         color: '#f38020',
-        logo: 'cloudflare.png',
+        logo: 'cloudflare.webp',
         feeds: [
             new Feed({ url: 'https://blog.cloudflare.com/rss/' })
         ],
@@ -93,7 +93,7 @@ export const companiesList = [
         id: 'spotify',
         name: 'Spotify',
         color: '#1db954',
-        logo: 'spotify.png',
+        logo: 'spotify.webp',
         feeds: [
             new Feed({ url: 'https://engineering.atspotify.com/feed/' })
         ],
@@ -102,16 +102,16 @@ export const companiesList = [
         id: 'uber',
         name: 'Uber',
         color: '#d1d5db',
-        logo: 'uber.png',
+        logo: 'uber.webp',
         feeds: [
-            new Feed({ url: 'https://rsshub.app/uber/blog' })
+            new Feed({ url: 'https://hub.slarker.me/uber/blog' })
         ],
     }),
     new Company({
         id: 'slack',
         name: 'Slack',
         color: '#e01e5a',
-        logo: 'slack.png',
+        logo: 'slack.webp',
         feeds: [
             new Feed({ url: 'https://slack.engineering/feed/' })
         ],
@@ -120,7 +120,7 @@ export const companiesList = [
         id: 'airbnb',
         name: 'Airbnb',
         color: '#ff5a5f',
-        logo: 'airbnb.png',
+        logo: 'airbnb.webp',
         feeds: [
             new Feed({ url: 'https://medium.com/feed/airbnb-engineering' })
         ],
@@ -129,7 +129,7 @@ export const companiesList = [
         id: 'openai',
         name: 'OpenAI',
         color: '#10a37f',
-        logo: 'openai.png',
+        logo: 'openai.webp',
         feeds: [
             // The main feed mixes product, company and policy news since 2015 (~1300 items)
             new Feed({ url: 'https://openai.com/news/rss.xml', categories: ['Engineering', 'Research', 'Security'], limit: 30 }),
@@ -140,7 +140,7 @@ export const companiesList = [
         id: 'nvidia',
         name: 'NVIDIA',
         color: '#76b900',
-        logo: 'nvidia.png',
+        logo: 'nvidia.webp',
         feeds: [
             new Feed({ url: 'https://developer.nvidia.com/blog/feed/', limit: 20 })
         ],
@@ -149,7 +149,7 @@ export const companiesList = [
         id: 'huggingface',
         name: 'Hugging Face',
         color: '#ffd21e',
-        logo: 'huggingface.png',
+        logo: 'huggingface.webp',
         feeds: [
             // The whole blog history (~900 items), community posts included
             new Feed({ url: 'https://huggingface.co/blog/feed.xml', limit: 20 })

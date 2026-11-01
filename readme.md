@@ -4,7 +4,7 @@
 **Elite Engineering** aggregates the official RSS/Atom feeds of top tech companies (Meta, Apple, Cloudflare, Dropbox, GitHub…) into one fast, responsive page.
 
 - [Quick start](#quick-start) · [Commands](#commands) · [How it works](#how-it-works) · [Project structure](#project-structure) · [Configuration](#configuration)
-- [Common tasks](#common-tasks) · [Tests](#tests) · [Deployment](#deployment) · [Reference](#reference) · [Known issues](#known-issues)
+- [Common tasks](#common-tasks) · [Tests](#tests) · [Deployment](#deployment) · [Reference](#reference) ([sponsored slots](#sponsored-slots)) · [Known issues](#known-issues)
 
 ## Quick start
 
@@ -53,11 +53,13 @@ web/
   index.html, style.css, static/
   config.js           API URL per environment
   data/companies.js   companies and feeds (also the API's allowlist)
+  data/sponsors.js    sponsors and the advertiser contact
+  advertise.html      page for advertisers (/advertise)
   src/
-    core/             Article, Company, Feed, filterArticles, LoadArticles
+    core/             Article, Company, Feed, filterArticles, pickFeatured, sponsorSlots, LoadArticles
     ports.js          interfaces: FeedGateway, KeyValueStore
     adapters/         API client, feed parser, localStorage cache
-    ui/               grid, Reels, share links, screen state
+    ui/               grid, Featured section, sponsor cards, Reels, share links, screen state
     main.js           wires adapters into the core
 test/                 api/, web/, architecture.test.js
 docs/                 diagrams (docs/diag) and design notes (docs/superpowers/specs)
@@ -92,6 +94,12 @@ Secrets (a database or login key, later on) never go in the repository: use `.en
 new Feed({ url: 'https://openai.com/news/rss.xml', categories: ['Engineering', 'Research', 'Security'], limit: 30 })
 ```
 
+**Featured section:** above the grid, the 3 newest articles with a cover image, at most one per company (`web/src/core/pickFeatured.js`). It shows only on the home view (no company filter, no search), and those articles are left out of the grid below; Reels still goes through every article. Change `count` there to show more or fewer.
+
+**Add a sponsor:** add it to `sponsors` in `web/data/sponsors.js` (fields documented there and in `web/src/core/sponsorSlots.js`). Where slots go, how many and which sponsor fills each one: [Sponsored slots](#sponsored-slots). With no sponsors, an "Advertise here" card (→ `/advertise`) fills the same slots. Links get `rel="sponsored"` and UTM tags (`utm_source=elite-engineering`, `utm_content=grid|reels`). Before deploying, set `ADVERTISE_CONTACT` there and the matching `data-advertise-contact` links in `web/advertise.html` (a test checks they match).
+
+**Keep SEO in sync:** the static parts crawlers read live in `web/` and point to `https://elite-engineering.pages.dev/`: the `<head>` of `index.html` (description, canonical, Open Graph, `WebSite` JSON-LD), the `#about` footer, `robots.txt`, `sitemap.xml` and `static/og-image.jpg` (1200×630). When you add a company, name it in `#about` too (`test/web/seo.test.js` fails otherwise). If the domain changes, update every one of those URLs. Search links (`/?q=<query>`) open with the search applied; they are the JSON-LD `SearchAction` target.
+
 **Call the API by hand:** it answers only the allowed origins (`403` otherwise), so send the header:
 
 ```bash
@@ -121,7 +129,7 @@ npm test
 | `test/api/adapters.test.js`, `contracts/` | each adapter against its port's contract |
 | `test/api/node.test.js` | Node server |
 | `api/platforms/cloudflare/test/` | Worker wiring and `wrangler.jsonc` checks (removed along with the folder) |
-| `test/web/` | feed parser (real RSS/Atom fixtures), search, share links, article loading and cache |
+| `test/web/` | feed parser (real RSS/Atom fixtures), search, Featured picks, sponsor slots and the advertise page, Reels gestures (drag, wheel), share and search links, article loading and cache, SEO tags |
 | `test/architecture.test.js` | the core doesn't import adapters, and Cloudflare code stays in its folder |
 
 ## Deployment
@@ -187,7 +195,43 @@ Reels' **Share** and **Copy** buttons link to our site, not the blog, so the lin
 
 While browsing Reels, the address bar shows the current article's link; closing Reels removes it.
 
+### Sponsored slots
+
+**The rule: one ad after every 8 articles, in the grid and in Reels.** It's one function, `placeSponsors()` in `web/src/core/sponsorSlots.js`, and one number, `AD_EVERY = 8` in `web/src/ui/state.js`.
+
+```
+a1 … a8 [AD] a9 … a16 [AD] a17 … a24 [AD] …
+```
+
+**How many:** with `n` articles in the list,
+
+```
+ads = floor((n − 1) / 8)
+```
+
+The `− 1` keeps an ad from ending the list: there's always an article after it. A list of up to 8 articles has no ads.
+
+| Articles in the list | Ads |
+|---|---|
+| 8 | 0 |
+| 9 | 1 |
+| 17 | 2 |
+| 50 | 6 |
+| 100 | 12 |
+| 226 (a typical home view) | 28 |
+
+**Which list:** the one the reader sees, after the company filter and the search. In the grid, that's without the 3 Featured articles (on the home view); in Reels, it's all of them, newest first. Ads never go in the Featured section.
+
+**Which ad goes in each slot:**
+
+- Sponsors whose `placements` include that list (`'grid'` or `'reels'`) take turns, in the order of `web/data/sponsors.js`. With 3 sponsors and 28 slots, each one shows 9 or 10 times.
+- With no sponsors, the house ad ("Advertise here" → `/advertise`) fills the same slots.
+
+**Label and link:** every ad shows a **Sponsored** badge. Sponsor links open in a new tab with `rel="sponsored noopener"` and UTM tags (`utm_source=elite-engineering`, `utm_medium=sponsored`, `utm_content=grid|reels`). In Reels, the counter shows "Sponsored" and the address bar drops `?reel=`, since ads can't be shared.
+
+**To change it:** set `AD_EVERY` (a larger number means fewer ads). Limits per sponsor aren't implemented; they would go in `placeSponsors()`, with a test in `test/web/sponsorSlots.test.js`.
+
 ## Known issues
 
 - **Try Again** on the error screen does nothing: its inline `onclick="initApp()"` can't reach a function inside the `src/main.js` module. Reload the page instead.
-- The **Uber** feed (`rsshub.app`) currently answers `403`, so Uber shows no articles.
+- Uber has no RSS of its own, so its feed comes from a public [RSSHub](https://docs.rsshub.app) instance (`hub.slarker.me`). Public instances come and go (`rsshub.app` started answering `403`); if Uber shows no articles, swap the host in `web/data/companies.js` for another instance, e.g. `rsshub.ktachibana.party`, or self-host RSSHub.

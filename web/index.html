@@ -3,7 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tech Engineering Blogs</title>
+    <title>Elite Engineering: Best Engineering Blogs from Meta, Netflix, Google, OpenAI &amp; more</title>
+    <meta name="description" content="The latest engineering articles from the official tech blogs of Meta, Netflix, Google, Amazon, Cloudflare, OpenAI, NVIDIA and more, in one fast, searchable feed.">
+    <link rel="canonical" href="https://elite-engineering.pages.dev/">
+    <meta name="theme-color" content="#0f172a">
+
+    <!-- Link previews (social crawlers don't run JS, so these are static) -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Elite Engineering">
+    <meta property="og:title" content="Elite Engineering: Best Engineering Blogs in One Feed">
+    <meta property="og:description" content="The latest engineering articles from Meta, Netflix, Google, Amazon, Cloudflare, OpenAI, NVIDIA and more, in one searchable feed.">
+    <meta property="og:url" content="https://elite-engineering.pages.dev/">
+    <meta property="og:image" content="https://elite-engineering.pages.dev/static/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Elite Engineering: a grid of articles from top tech engineering blogs">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- ?q= is read by src/main.js, so the search box works from the result page -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Elite Engineering",
+        "url": "https://elite-engineering.pages.dev/",
+        "description": "The latest engineering articles from the official tech blogs of industry-leading companies.",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": { "@type": "EntryPoint", "urlTemplate": "https://elite-engineering.pages.dev/?q={search_term_string}" },
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+
+    <link rel="preconnect" href="https://elite-engineering-api.williamtrindade-dev.workers.dev" crossorigin>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
@@ -44,7 +77,7 @@
 
     <!-- Company Filters -->
     <div class="mb-12">
-        <h3 class="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-4 text-center">Filter by company</h3>
+        <h2 class="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-4 text-center">Filter by company</h2>
         <div id="filterContainer" class="filter-scroll flex flex-nowrap overflow-x-auto gap-4 -mx-4 px-4 py-2 md:mx-0 md:px-0 md:flex-wrap md:justify-center md:overflow-visible">
             <!-- Filters injected via JS -->
         </div>
@@ -52,6 +85,20 @@
 
     <!-- Content Area -->
     <main>
+        <!-- Featured posts (home view only): newest with a cover, one per company -->
+        <section id="featuredSection" class="hidden mb-12" aria-labelledby="featuredHeading">
+            <h2 id="featuredHeading" class="text-xs uppercase tracking-wider text-gray-500 font-semibold mb-4">
+                <i class="fas fa-star accent-text mr-1"></i> Featured
+            </h2>
+            <div id="featuredGrid" class="featured-grid">
+                <!-- Cards injected via JS -->
+            </div>
+        </section>
+
+        <noscript>
+            <p class="text-center text-gray-400 py-20">Elite Engineering needs JavaScript to load the latest articles.</p>
+        </noscript>
+
         <!-- Loading State -->
         <div id="loadingState" class="flex flex-col items-center justify-center py-20">
             <div class="loader mb-4"></div>
@@ -79,7 +126,27 @@
             <!-- Cards injected via JS -->
         </div>
     </main>
+
+    <!-- Static text so crawlers see what the site covers without running JS.
+         test/web/seo.test.js checks it names every company in data/companies.js. -->
+    <footer id="about" class="mt-20 pt-8 border-t border-white/10 text-center text-sm text-gray-500 max-w-3xl mx-auto">
+        <h2 class="text-base font-semibold text-gray-400 mb-2">About Elite Engineering</h2>
+        <p>
+            Elite Engineering brings together the newest posts from the official engineering blogs of
+            Meta, Apple, Netflix, Google, Amazon, Microsoft, IBM, Dropbox, Cloudflare, Spotify, Uber,
+            Slack, Airbnb, OpenAI, NVIDIA and Hugging Face. Search across AI, machine learning,
+            infrastructure, security and performance articles, or browse them one at a time in Reels.
+        </p>
+        <p class="mt-4">
+            <a href="advertise" class="text-gray-400 hover:text-white underline underline-offset-4 transition-colors">Advertise with us</a>
+        </p>
+    </footer>
 </div>
+
+<!-- Back to top (shown after scrolling past the first screen, see src/ui/BackToTop.js) -->
+<button id="backToTopBtn" class="back-to-top glass" aria-label="Back to top" tabindex="-1">
+    <i class="fas fa-arrow-up"></i>
+</button>
 
 <!-- Reels Mode (fullscreen, one article at a time) -->
 <div id="reelsOverlay" class="reels-overlay hidden" role="dialog" aria-modal="true" aria-label="Reels mode">

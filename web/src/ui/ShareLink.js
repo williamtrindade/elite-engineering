@@ -13,3 +13,9 @@ export function buildReelUrl(articleLink, base = window.location.href) {
 export function parseReelParam(search = window.location.search) {
     return new URLSearchParams(search).get(PARAM) || null;
 }
+
+// Search links (?q=<query>) open the home page with the search already applied.
+// It's the target of the WebSite SearchAction in index.html.
+export function parseSearchParam(search = window.location.search) {
+    return (new URLSearchParams(search).get('q') || '').trim();
+}

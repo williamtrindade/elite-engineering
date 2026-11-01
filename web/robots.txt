@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://elite-engineering.pages.dev/sitemap.xml
