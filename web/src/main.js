@@ -66,17 +66,23 @@ function applySearch(query) {
     ui.DOM.clearSearchBtn.classList.toggle('hidden', query.length === 0);
 }
 
+// Re-rendering the grid is heavy, so wait for a pause in typing instead of doing it per key
+const SEARCH_DEBOUNCE_MS = 200;
+let searchTimer;
+
 ui.DOM.searchInput.addEventListener('input', (e) => {
     applySearch(e.target.value.trim());
 
+    clearTimeout(searchTimer);
     // Render directly without full updateUI to avoid re-rendering filters unnecessarily
-    ui.renderArticles();
+    searchTimer = setTimeout(() => ui.renderArticles(), SEARCH_DEBOUNCE_MS);
 });
 
 /**
  * Clear Search
  */
 ui.DOM.clearSearchBtn.addEventListener('click', () => {
+    clearTimeout(searchTimer);
     ui.DOM.searchInput.value = '';
     state.searchQuery = '';
     ui.DOM.clearSearchBtn.classList.add('hidden');

@@ -97,9 +97,12 @@ export class UI {
         this.DOM.emptyState.classList.add('hidden');
         this.DOM.articlesGrid.classList.toggle('hidden', gridItems.length === 0);
 
+        // Build off-DOM and insert once: one layout (and one Tailwind CDN scan) instead of one per card
+        const fragment = document.createDocumentFragment();
+
         gridItems.forEach(article => {
             if (article.isSponsored) {
-                this.DOM.articlesGrid.appendChild(createSponsorGridCard(article.sponsor));
+                fragment.appendChild(createSponsorGridCard(article.sponsor));
                 return;
             }
 
@@ -151,8 +154,10 @@ export class UI {
                     </div>
                 `;
             card.append(createArticleMedia(article, foundCompany, { className: 'aspect-video' }), body);
-            this.DOM.articlesGrid.appendChild(card);
+            fragment.appendChild(card);
         });
+
+        this.DOM.articlesGrid.appendChild(fragment);
     }
 
     // Featured section above the grid: the first card is the large one (see .featured-grid)
