@@ -64,7 +64,7 @@ export class UI {
                 btn.classList.add('active');
             }
 
-            btn.innerHTML = `<img src="static/${company.logo}" alt="${company.name}" title="${company.name}" class="w-full h-full object-contain">`;
+            btn.innerHTML = `<img src="static/${company.logo}" alt="${company.name}" title="${company.name}" class="w-full h-full object-contain ${company.whiteLogo ? 'logo-white' : ''}">`;
 
             btn.addEventListener('click', () => {
                 state.activeFilter = state.activeFilter === company.id ? null : company.id;
@@ -125,7 +125,7 @@ export class UI {
                             <img 
                                 src="static/${foundCompany.logo}"
                                 onerror="this.src='https://ui-avatars.com/api/?name=${article.companyName}&background=random&color=fff&size=20&rounded=true'"
-                                class="w-5 h-5 rounded-full" 
+                                class="w-5 h-5 rounded-full ${foundCompany.whiteLogo ? 'logo-white' : ''}" 
                                 alt=""
                             >
                             <span class="text-xs font-semibold text-gray-300 tracking-wide uppercase">${article.companyName}</span>

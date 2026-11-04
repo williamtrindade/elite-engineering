@@ -4,7 +4,7 @@
 **Elite Engineering** aggregates the official RSS/Atom feeds of 33 top tech companies (Meta, Apple, Google, Netflix, GitHub, Shopify, Datadog, Nubank…) into one fast, responsive page.
 
 - [Quick start](#quick-start) · [Commands](#commands) · [How it works](#how-it-works) · [Project structure](#project-structure) · [Configuration](#configuration)
-- [Common tasks](#common-tasks) · [Tests](#tests) · [Deployment](#deployment) · [Reference](#reference) ([sponsored slots](#sponsored-slots)) · [Known issues](#known-issues)
+- [Common tasks](#common-tasks) · [Tests](#tests) · [Deployment](#deployment) · [Reference](#reference) ([light and dark theme](#light-and-dark-theme), [sponsored slots](#sponsored-slots)) · [Known issues](#known-issues)
 
 ## Quick start
 
@@ -33,6 +33,7 @@ Open **http://localhost:8788**.
 
 - **`web/`**: front end in plain HTML, CSS and ES modules, with no build step. It parses the feeds in the browser and caches the articles in `localStorage` for **12 h**. It waits for the feeds for at most **3 s** and then shows what arrived: a slower feed is left out of that visit, keeps loading in the background, and shows up on the next one from the cache. The page never reorders itself after it shows. A shared Reels link (`?reel=`) waits for every feed instead, since the article may be in a slow one. It gives up on a feed the API doesn't answer within **10 s**.
 - **`api/`**: fetches the feeds for the browser, because blogs block cross-origin requests. It only serves feeds listed in `web/data/companies.js`, caches them for **30 min**, accepts only the site's origins, and allows **120 requests/min per IP** (an uncached page load makes one per feed). A blog that doesn't answer within **8 s** gets a `502`, so it can't hold the request. It runs on Cloudflare Workers in production and on Node locally.
+- **Light and dark theme:** it follows the system until the reader picks one with the ☀️/🌙 button; the choice is kept in `localStorage` ([details](#light-and-dark-theme)).
 - **Images** are not proxied: the browser downloads them straight from each blog ([details](#article-images)).
 
 ## Project structure
@@ -59,7 +60,7 @@ web/
     core/             Article, Company, Feed, filterArticles, pickFeatured, sponsorSlots, LoadArticles
     ports.js          interfaces: FeedGateway, KeyValueStore
     adapters/         API client, feed parser, localStorage cache
-    ui/               grid, Featured section, sponsor cards, Reels, share links, screen state
+    ui/               grid, Featured section, sponsor cards, Reels, share links, light/dark theme, screen state
     main.js           wires adapters into the core
 test/                 api/, web/, architecture.test.js
 docs/                 diagrams (docs/diag) and design notes (docs/superpowers/specs)
@@ -134,7 +135,7 @@ npm test
 | `test/api/adapters.test.js`, `contracts/` | each adapter against its port's contract, and the timeout on a blog that never answers |
 | `test/api/node.test.js` | Node server |
 | `api/platforms/cloudflare/test/` | Worker wiring and `wrangler.jsonc` checks (removed along with the folder) |
-| `test/web/` | feed parser (real RSS/Atom fixtures), search, Featured picks, sponsor slots and the advertise page, Reels gestures (drag, wheel), share and search links, article loading (the 3 s wait, and waiting for every feed) and cache, the API client's timeout, SEO tags |
+| `test/web/` | feed parser (real RSS/Atom fixtures), search, Featured picks, sponsor slots and the advertise page, Reels gestures (drag, wheel), share and search links, light/dark theme choice, article loading (the 3 s wait, and waiting for every feed) and cache, the API client's timeout, SEO tags |
 | `test/architecture.test.js` | the core doesn't import adapters, and Cloudflare code stays in its folder |
 
 ## Deployment
@@ -200,6 +201,16 @@ Reels' **Share** and **Copy** buttons link to our site, not the blog, so the lin
 3. If it finds the article, Reels opens on it. If not (the post left the feed, the URL changed, or its blog didn't answer in time), the param is dropped and the home page stays.
 
 While browsing Reels, the address bar shows the current article's link; closing Reels removes it.
+
+### Light and dark theme
+
+The theme is `data-theme="light"` or `"dark"` on `<html>`.
+
+1. An inline script in the `<head>` of `index.html` and `advertise.html` picks it before the first paint, so the page never flashes the wrong one: the saved choice (`localStorage` key `theme`), otherwise the system's (`prefers-color-scheme`).
+2. `web/src/ui/ColorScheme.js` runs the ☀️/🌙 button: it toggles the theme and saves the choice. Until the reader clicks it, the page follows the system as it changes.
+3. The markup is written for the dark theme (Tailwind's `text-white`, `text-gray-400`, `border-white/10`…). The light theme is one block at the end of `web/style.css` that remaps those classes, so templates don't need a variant per theme. When you use a new Tailwind color class, add its light version there.
+4. Image areas stay dark in both themes: card covers, the Featured cards and Reels, since their text sits on images.
+5. White logos would vanish on white, so companies with `whiteLogo: true` in `web/data/companies.js` get `.logo-white`, inverted on the light theme. Set it when you add a company whose logo is white.
 
 ### Sponsored slots
 

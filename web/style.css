@@ -30,6 +30,14 @@ body {
     transition: color 1.2s ease;
 }
 
+/* Site and page titles (index.html, advertise.html) */
+.title-gradient {
+    color: transparent;
+    background-image: linear-gradient(to right, #ffffff, #9ca3af);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
 @keyframes float {
     0% { transform: translate(0, 0) scale(1); }
     100% { transform: translate(50px, 30px) scale(1.1); }
@@ -584,4 +592,99 @@ body.reels-open .back-to-top {
 }
 .reels-card .sponsor-media-icon {
     font-size: 4rem;
+}
+
+/* ------------------------------------------------------------------------------------------
+   Light theme: <html data-theme="light">, set by the inline script in <head> and
+   src/ui/ColorScheme.js. The markup uses Tailwind's dark-theme colors (text-white,
+   text-gray-400, border-white/10…), so they are remapped here instead of in every template.
+   Covers, the Featured cards and Reels keep white text over images, so they stay dark.
+   ------------------------------------------------------------------------------------------ */
+:root[data-theme="light"] {
+    color-scheme: light;
+}
+:root[data-theme="dark"] {
+    color-scheme: dark;
+}
+[data-theme="light"] body {
+    background-color: #f8fafc;
+    color: #0f172a;
+}
+[data-theme="light"] .bg-shape {
+    opacity: 0.55;
+}
+[data-theme="light"] .title-gradient {
+    background-image: linear-gradient(to right, #0f172a, #475569);
+}
+[data-theme="light"] .accent-text {
+    color: color-mix(in srgb, var(--accent, rgb(79 70 229)) 75%, black);
+}
+
+/* Text: everything outside the image areas */
+[data-theme="light"] :is(.text-white, .hover\:text-white:hover):not(:is(.featured-card, .reels-overlay, .article-media) *):not(.bg-blue-600) { color: #0f172a; }
+[data-theme="light"] :is(.text-gray-100, .text-gray-200):not(:is(.featured-card, .reels-overlay) *) { color: #1e293b; }
+[data-theme="light"] .text-gray-300:not(:is(.featured-card, .reels-overlay) *) { color: #334155; }
+[data-theme="light"] .text-gray-400:not(:is(.featured-card, .reels-overlay) *) { color: #475569; }
+[data-theme="light"] .text-gray-500:not(:is(.featured-card, .reels-overlay) *) { color: #64748b; }
+[data-theme="light"] .text-gray-600:not(:is(.featured-card, .reels-overlay) *) { color: #94a3b8; }
+[data-theme="light"] .text-red-400 { color: #dc2626; }
+[data-theme="light"] .group-hover\:text-indigo-400:hover { color: #4f46e5; }
+[data-theme="light"] .placeholder-gray-500::placeholder { color: #94a3b8; }
+
+/* Borders and translucent fills: dark ink instead of white */
+[data-theme="light"] .border-white\/10:not(.reels-overlay *) { border-color: rgba(15, 23, 42, 0.1); }
+[data-theme="light"] .border-white\/20:not(.reels-overlay *) { border-color: rgba(15, 23, 42, 0.15); }
+[data-theme="light"] .bg-white\/5:not(.reels-overlay *) { background-color: rgba(15, 23, 42, 0.04); }
+[data-theme="light"] :is(.bg-white\/10, .hover\:bg-white\/10:hover):not(.reels-overlay *) { background-color: rgba(15, 23, 42, 0.06); }
+[data-theme="light"] .hover\:bg-white\/20:hover:not(.reels-overlay *) { background-color: rgba(15, 23, 42, 0.1); }
+
+/* Glass: frosted white over the pastel background (Reels keeps its dark chips over images) */
+[data-theme="light"] .glass:not(.reels-overlay *) {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: rgba(15, 23, 42, 0.08);
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+}
+[data-theme="light"] .glass-panel {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.6) 100%);
+    border-color: rgba(15, 23, 42, 0.08);
+    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+}
+[data-theme="light"] .article-card.glass-panel {
+    background: #ffffff;
+}
+[data-theme="light"] .glass-hover:hover,
+[data-theme="light"] .featured-card:hover {
+    background: #ffffff;
+    border-color: rgba(15, 23, 42, 0.18);
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.14);
+}
+[data-theme="light"] .featured-card:focus-visible,
+[data-theme="light"] .back-to-top:focus-visible {
+    outline-color: color-mix(in srgb, var(--accent, rgb(79 70 229)) 75%, black);
+}
+
+/* Unselected company logos fade less: on white, grayscale at half opacity is barely visible */
+[data-theme="light"] .company-filter.opacity-50 {
+    opacity: 0.8;
+}
+
+/* White logos would vanish on white: show them dark (Company.whiteLogo) */
+[data-theme="light"] .logo-white {
+    filter: invert(1);
+}
+
+[data-theme="light"] .loader {
+    border-color: rgba(15, 23, 42, 0.1);
+    border-top-color: #4f46e5;
+}
+[data-theme="light"] .back-to-top {
+    color: #0f172a;
+}
+[data-theme="light"] .back-to-top:hover {
+    background: color-mix(in srgb, var(--accent, rgb(99 102 241)) 18%, rgba(255, 255, 255, 0.9));
+}
+[data-theme="light"] .sponsor-badge:not(:is(.featured-card, .reels-overlay, .article-media) *) {
+    color: #92400e;
+    background: rgba(251, 191, 36, 0.18);
+    border-color: rgba(217, 119, 6, 0.4);
 }

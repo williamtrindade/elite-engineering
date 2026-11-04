@@ -13,6 +13,7 @@ import { AppController } from './ui/AppController.js';
 import { ReelsUI } from './ui/ReelsUI.js';
 import { parseReelParam, parseSearchParam } from './ui/ShareLink.js';
 import { initBackToTop } from './ui/BackToTop.js';
+import { initColorScheme } from './ui/ColorScheme.js';
 
 const ui = new UI();
 const reels = new ReelsUI();
@@ -97,3 +98,4 @@ ui.DOM.clearSearchBtn.addEventListener('click', () => {
 ui.DOM.reelsBtn.addEventListener('click', () => reels.open());
 
 initBackToTop(document.getElementById('backToTopBtn'));
+initColorScheme(document.getElementById('themeBtn'));

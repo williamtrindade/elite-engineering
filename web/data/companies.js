@@ -17,6 +17,7 @@ export const companiesList = [
         name: 'Apple',
         color: '#a2aaad',
         logo: 'apple.webp',
+        whiteLogo: true,
         feeds: [
             new Feed({ url: 'https://webkit.org/blog/feed/' }),
             new Feed({ url: 'https://www.swift.org/atom.xml' }),
@@ -85,6 +86,7 @@ export const companiesList = [
         name: 'Cloudflare',
         color: '#f38020',
         logo: 'cloudflare.webp',
+        whiteLogo: true,
         feeds: [
             new Feed({ url: 'https://blog.cloudflare.com/rss/' })
         ],
@@ -103,6 +105,7 @@ export const companiesList = [
         name: 'Uber',
         color: '#d1d5db',
         logo: 'uber.webp',
+        whiteLogo: true,
         feeds: [
             new Feed({ url: 'https://hub.slarker.me/uber/blog' })
         ],
@@ -130,6 +133,7 @@ export const companiesList = [
         name: 'OpenAI',
         color: '#10a37f',
         logo: 'openai.webp',
+        whiteLogo: true,
         feeds: [
             // The main feed mixes product, company and policy news since 2015 (~1300 items)
             new Feed({ url: 'https://openai.com/news/rss.xml', categories: ['Engineering', 'Research', 'Security'], limit: 30 }),
@@ -160,6 +164,7 @@ export const companiesList = [
         name: 'GitHub',
         color: '#e6edf3',
         logo: 'github.webp',
+        whiteLogo: true,
         feeds: [
             new Feed({ url: 'https://github.blog/engineering/feed/' })
         ],
@@ -252,6 +257,7 @@ export const companiesList = [
         name: 'Mozilla',
         color: '#e5e7eb',
         logo: 'mozilla.webp',
+        whiteLogo: true,
         feeds: [
             new Feed({ url: 'https://hacks.mozilla.org/feed/' })
         ],

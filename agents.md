@@ -27,6 +27,7 @@ How to work on this repository. What the project does and how it's built is in [
 
 - **Nothing may wait forever for a blog.** The API gives up on a blog after 8 s, the browser on the API after 10 s, and the page shows what it has after 3 s (except for shared `?reel=` links, which wait for every feed). The browser timeout must stay above the API's. See "Change the waiting times" in the readme.
 - **The page doesn't reorder after it shows.** Feeds that miss the 3 s wait are left out of that visit and show up on the next one from the cache; don't render them as they arrive.
+- **Both themes.** The markup uses the dark theme's Tailwind colors; the light theme remaps them in one block at the end of `web/style.css`. A new color class needs its light version there, and a company with a white logo needs `whiteLogo: true`. Check UI changes in both themes.
 - **Cache keys:** bump `CACHE_PREFIX` in `web/src/adapters/CachedFeedGateway.js` when the cached shape changes.
 
 ## Style

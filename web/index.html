@@ -37,6 +37,17 @@
     </script>
 
     <link rel="preconnect" href="https://elite-engineering-api.williamtrindade-dev.workers.dev" crossorigin>
+    <script>
+        // Theme before the first paint, so the page never flashes the wrong one.
+        // Same rule as resolveTheme() in src/ui/ColorScheme.js: saved choice, otherwise the system's.
+        (() => {
+            let saved = null;
+            try { saved = localStorage.getItem('theme'); } catch { /* blocked storage */ }
+            document.documentElement.dataset.theme = saved === 'light' || saved === 'dark'
+                ? saved
+                : matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
@@ -54,7 +65,7 @@
     <!-- Header: name, search and Reels in one row (search wraps below on phones) -->
     <header class="flex flex-wrap items-center gap-x-6 gap-y-3 mb-4">
         <div class="order-1 shrink-0">
-            <h1 class="text-xl md:text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
+            <h1 class="text-xl md:text-2xl font-bold tracking-tight title-gradient">
                 Elite Engineering
             </h1>
             <p class="hidden lg:block text-gray-500 text-xs">
@@ -71,10 +82,17 @@
             </button>
         </div>
 
-        <button id="reelsBtn" disabled
-                class="order-2 md:order-3 ml-auto md:ml-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass text-white font-medium hover:bg-white/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-            <i class="fas fa-film"></i> Reels
-        </button>
+        <div class="order-2 md:order-3 ml-auto md:ml-0 flex items-center gap-2">
+            <button id="reelsBtn" disabled
+                    class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass text-white font-medium hover:bg-white/10 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                <i class="fas fa-film"></i> Reels
+            </button>
+            <!-- Icon and label set by src/ui/ColorScheme.js -->
+            <button id="themeBtn" type="button" aria-label="Switch theme"
+                    class="w-11 h-11 inline-flex items-center justify-center rounded-full glass text-white hover:bg-white/10 transition-colors">
+                <i class="fas fa-circle-half-stroke" aria-hidden="true"></i>
+            </button>
+        </div>
     </header>
 
     <!-- Company Filters -->
