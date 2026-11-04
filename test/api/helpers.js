@@ -32,3 +32,13 @@ export function mockFetch(impl) {
 }
 
 export const upstream = (status, body = '<rss/>') => async () => new Response(body, { status });
+
+// fetch for a blog that accepts the connection and never answers, until the request is aborted.
+// The interval stands in for the open socket, which keeps a real process alive while it waits.
+export const hangingFetch = async (url, options) => new Promise((resolve, reject) => {
+    const socket = setInterval(() => {}, 1000);
+    options?.signal?.addEventListener('abort', () => {
+        clearInterval(socket);
+        reject(options.signal.reason);
+    });
+});

@@ -23,7 +23,9 @@ async function initApp() {
     state.sponsors = sponsors;
 
     const feedGateway = new CachedFeedGateway(new ApiFeedGateway(API_BASE), new LocalStorageStore());
-    const appController = new AppController(new LoadArticles(feedGateway), ui);
+    // A shared Reels link waits for every feed: the article may be in a slow one
+    const loadArticles = new LoadArticles(feedGateway, parseReelParam() ? { waitMs: Infinity } : {});
+    const appController = new AppController(loadArticles, ui);
 
     const sharedQuery = parseSearchParam();
     ui.DOM.searchInput.value = sharedQuery;

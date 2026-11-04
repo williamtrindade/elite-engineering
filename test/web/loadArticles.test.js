@@ -73,3 +73,47 @@ test('CachedFeedGateway reuses a stored feed and drops old cache versions', asyn
     assert.equal(storage.getItem('articles_v1_https://old'), null);
     assert.equal(storage.getItem('theme'), 'dark');
 });
+
+// FeedGateway fake whose 'https://b/broken' feed only answers when the test says so
+const withSlowFeed = () => {
+    const slow = {};
+    return {
+        slow,
+        async fetch(url) {
+            if (url === 'https://b/broken') return new Promise(resolve => { slow.answer = resolve; });
+            return { feed: {}, items: url === 'https://a/feed' ? [item('a', '2026-01-01')] : [item('b', '2026-02-01')] };
+        }
+    };
+};
+
+test('LoadArticles leaves out a feed slower than waitMs, so it cannot hold the page', async () => {
+    const feeds = withSlowFeed();
+
+    const articles = await new LoadArticles(feeds, { waitMs: 20 }).execute(companies);
+    feeds.slow.answer({ feed: {}, items: [item('slow', '2026-03-01')] });
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    // What the page shows doesn't change when the slow feed arrives later
+    assert.deepEqual(articles.map(a => a.title), ['b', 'a']);
+});
+
+test('LoadArticles keeps waiting past waitMs while no feed has arrived', async () => {
+    const feeds = withSlowFeed();
+    const onlySlow = [new Company({ id: 'b', name: 'B', feeds: [new Feed({ url: 'https://b/broken' })] })];
+
+    const loading = new LoadArticles(feeds, { waitMs: 5 }).execute(onlySlow);
+    await new Promise(resolve => setTimeout(resolve, 20));
+    feeds.slow.answer({ feed: {}, items: [item('slow', '2026-03-01')] });
+
+    assert.deepEqual((await loading).map(a => a.title), ['slow']);
+});
+
+test('LoadArticles waits for every feed when waitMs is Infinity (a shared Reels link)', async () => {
+    const feeds = withSlowFeed();
+
+    const loading = new LoadArticles(feeds, { waitMs: Infinity }).execute(companies);
+    await new Promise(resolve => setTimeout(resolve, 20));
+    feeds.slow.answer({ feed: {}, items: [item('slow', '2026-03-01')] });
+
+    assert.deepEqual((await loading).map(a => a.title), ['slow', 'b', 'a']);
+});

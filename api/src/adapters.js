@@ -9,6 +9,9 @@ const HEADERS = {
     'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml;q=0.9, */*;q=0.8'
 };
 
+// A blog that never answers would otherwise hold the request (and the site's loading screen) forever
+const FEED_TIMEOUT_MS = 8000;
+
 /**
  * FeedGateway over the standard fetch API.
  * `init` adds runtime-specific request options (e.g. edge caching), passed in by the platform.
@@ -16,13 +19,18 @@ const HEADERS = {
  * @implements {import('./ports.js').FeedGateway}
  */
 export class FetchFeedGateway {
-    constructor({ init = {} } = {}) {
+    constructor({ init = {}, timeoutMs = FEED_TIMEOUT_MS } = {}) {
         this.init = init;
+        this.timeoutMs = timeoutMs;
     }
 
     async fetch(url) {
         // Looked up per call, so tests can replace globalThis.fetch
-        const response = await globalThis.fetch(url, { ...this.init, headers: HEADERS });
+        const response = await globalThis.fetch(url, {
+            ...this.init,
+            headers: HEADERS,
+            signal: AbortSignal.timeout(this.timeoutMs)
+        });
         return { ok: response.ok, status: response.status, body: response.body };
     }
 }

@@ -15,7 +15,7 @@
  *
  * @typedef {object} FeedGateway
  *   Downloads a feed from its blog. Implementations: FetchFeedGateway, CachedFeedGateway (adapters.js).
- * @property {(url: string) => Promise<FeedResponse>} fetch  rejects when the blog can't be reached
+ * @property {(url: string) => Promise<FeedResponse>} fetch  rejects when the blog can't be reached or doesn't answer in time
  *
  * @typedef {(fields: object, message: string) => void} LogMethod
  *

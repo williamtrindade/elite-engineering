@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { CachedFeedGateway, FetchFeedGateway, MemoryCache, MemoryRateLimiter } from '../../api/src/adapters.js';
 import { rateLimiterContract } from './contracts/rateLimiter.contract.js';
 import { feedGatewayContract } from './contracts/feedGateway.contract.js';
-import { mockFetch, upstream } from './helpers.js';
+import { hangingFetch, mockFetch, upstream } from './helpers.js';
 
 rateLimiterContract('MemoryRateLimiter', limit => new MemoryRateLimiter({ requests: limit, periodSeconds: 60 }));
 feedGatewayContract('FetchFeedGateway', () => new FetchFeedGateway());
@@ -81,4 +81,10 @@ test('FetchFeedGateway passes runtime-specific request options', async () => {
     await new FetchFeedGateway({ init: { cf: { cacheTtl: 5 } } }).fetch('https://blog.example.com/rss');
 
     assert.deepEqual(init.cf, { cacheTtl: 5 });
+});
+
+test('FetchFeedGateway gives up on a blog that never answers', async () => {
+    restore = mockFetch(hangingFetch);
+
+    await assert.rejects(new FetchFeedGateway({ timeoutMs: 20 }).fetch('https://blog.example.com/rss'));
 });

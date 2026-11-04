@@ -31,8 +31,8 @@ Open **http://localhost:8788**.
 
 ![generalArchitecture.svg](docs/diag/generalArchitecture.svg)
 
-- **`web/`**: front end in plain HTML, CSS and ES modules, with no build step. It parses the feeds in the browser and caches the articles in `localStorage` for **12 h**.
-- **`api/`**: fetches the feeds for the browser, because blogs block cross-origin requests. It only serves feeds listed in `web/data/companies.js`, caches them for **30 min**, accepts only the site's origins, and allows **60 requests/min per IP**. It runs on Cloudflare Workers in production and on Node locally.
+- **`web/`**: front end in plain HTML, CSS and ES modules, with no build step. It parses the feeds in the browser and caches the articles in `localStorage` for **12 h**. It waits for the feeds for at most **3 s** and then shows what arrived: a slower feed is left out of that visit, keeps loading in the background, and shows up on the next one from the cache. The page never reorders itself after it shows. A shared Reels link (`?reel=`) waits for every feed instead, since the article may be in a slow one. It gives up on a feed the API doesn't answer within **10 s**.
+- **`api/`**: fetches the feeds for the browser, because blogs block cross-origin requests. It only serves feeds listed in `web/data/companies.js`, caches them for **30 min**, accepts only the site's origins, and allows **60 requests/min per IP**. A blog that doesn't answer within **8 s** gets a `502`, so it can't hold the request. It runs on Cloudflare Workers in production and on Node locally.
 - **Images** are not proxied: the browser downloads them straight from each blog ([details](#article-images)).
 
 ## Project structure
@@ -63,6 +63,7 @@ web/
     main.js           wires adapters into the core
 test/                 api/, web/, architecture.test.js
 docs/                 diagrams (docs/diag) and design notes (docs/superpowers/specs)
+agents.md             rules for AI coding agents working on this repository
 ```
 
 ## Configuration
@@ -108,6 +109,8 @@ curl -H "Origin: http://localhost:8788" "http://localhost:8787/api/feed?url=http
 
 The Origin check stops other websites, but it is not authentication: a script can fake the header.
 
+**Change the waiting times:** they are constants, not environment variables. How long the page waits before showing what arrived: `WAIT_MS` in `web/src/core/LoadArticles.js` (3 s; `Infinity` waits for every feed, used for `?reel=` links). How long the browser waits for the API: `FEED_TIMEOUT_MS` in `web/src/adapters/ApiFeedGateway.js` (10 s). How long the API waits for a blog: `FEED_TIMEOUT_MS` in `api/src/adapters.js` (8 s). Keep the browser's above the API's, so the API answers with a `502` first.
+
 **Reload the feeds instead of using the 12 h cache:** DevTools → Application → Clear site data.
 
 **Swap an implementation** (e.g. a Redis rate limiter): write a class with the port's shape, run the port's contract suite (`test/api/contracts/`) against it, then change one line in `api/platforms/node.js` or `api/platforms/cloudflare/worker.js`.
@@ -126,10 +129,10 @@ npm test
 |---|---|
 | `test/api/app.test.js` | API behaviour: origins, CORS, allowlist, rate limit, errors |
 | `test/api/config.test.js` | environment validation |
-| `test/api/adapters.test.js`, `contracts/` | each adapter against its port's contract |
+| `test/api/adapters.test.js`, `contracts/` | each adapter against its port's contract, and the timeout on a blog that never answers |
 | `test/api/node.test.js` | Node server |
 | `api/platforms/cloudflare/test/` | Worker wiring and `wrangler.jsonc` checks (removed along with the folder) |
-| `test/web/` | feed parser (real RSS/Atom fixtures), search, Featured picks, sponsor slots and the advertise page, Reels gestures (drag, wheel), share and search links, article loading and cache, SEO tags |
+| `test/web/` | feed parser (real RSS/Atom fixtures), search, Featured picks, sponsor slots and the advertise page, Reels gestures (drag, wheel), share and search links, article loading (the 3 s wait, and waiting for every feed) and cache, the API client's timeout, SEO tags |
 | `test/architecture.test.js` | the core doesn't import adapters, and Cloudflare code stays in its folder |
 
 ## Deployment
@@ -191,7 +194,8 @@ Reels' **Share** and **Copy** buttons link to our site, not the blog, so the lin
 
 1. `buildReelUrl()` (`web/src/ui/ShareLink.js`) puts the article URL in `?reel=`.
 2. On load, `openSharedReel()` (`web/src/main.js`) reads it back and looks for the article with that exact `link`.
-3. If it finds the article, Reels opens on it. If not (the post left the feed, or the URL changed), the param is dropped and the home page stays.
+   With `?reel=` the page skips the 3 s wait and loads every feed first (`web/src/main.js`), so an article from a slow blog is still found. A blog that hangs delays it up to the timeouts (8 s in the API, 10 s in the browser).
+3. If it finds the article, Reels opens on it. If not (the post left the feed, the URL changed, or its blog didn't answer in time), the param is dropped and the home page stays.
 
 While browsing Reels, the address bar shows the current article's link; closing Reels removes it.
 
@@ -234,4 +238,4 @@ The `− 1` keeps an ad from ending the list: there's always an article after it
 ## Known issues
 
 - **Try Again** on the error screen does nothing: its inline `onclick="initApp()"` can't reach a function inside the `src/main.js` module. Reload the page instead.
-- Uber has no RSS of its own, so its feed comes from a public [RSSHub](https://docs.rsshub.app) instance (`hub.slarker.me`). Public instances come and go (`rsshub.app` started answering `403`); if Uber shows no articles, swap the host in `web/data/companies.js` for another instance, e.g. `rsshub.ktachibana.party`, or self-host RSSHub.
+- Uber has no RSS of its own, so its feed comes from a public [RSSHub](https://docs.rsshub.app) instance (`hub.slarker.me`). Public instances come and go (`rsshub.app` started answering `403`), and this one sometimes hangs: the API gives up after 8 s and the page doesn't wait for it, so Uber is just missing on that visit. If Uber keeps showing no articles, swap the host in `web/data/companies.js` for another instance, e.g. `rsshub.ktachibana.party`, or self-host RSSHub.
