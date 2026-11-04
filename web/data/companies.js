@@ -16,7 +16,8 @@ export const companiesList = [
         id: 'apple',
         name: 'Apple',
         color: '#a2aaad',
-        logo: 'apple.webp',
+        // PNG, not WebP: iOS Safari wouldn't decode this logo as WebP
+        logo: 'apple.png',
         whiteLogo: true,
         feeds: [
             new Feed({ url: 'https://webkit.org/blog/feed/' }),

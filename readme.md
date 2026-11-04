@@ -96,7 +96,7 @@ Secrets (a database or login key, later on) never go in the repository: use `.en
 new Feed({ url: 'https://openai.com/news/rss.xml', categories: ['Engineering', 'Research', 'Security'], limit: 30 })
 ```
 
-If the blog blocks its images on other sites (the browser logs `ERR_BLOCKED_BY_RESPONSE`), add `images: false` so its cards use the logo instead (AMD's GPUOpen does this). Logos are 256×256 `.webp` with a transparent background; [Simple Icons](https://simpleicons.org) has most brands as SVG, in their brand color. Each page load without cache makes one API request per feed, so keep `RATE_LIMIT_REQUESTS` well above the number of feeds.
+If the blog blocks its images on other sites (the browser logs `ERR_BLOCKED_BY_RESPONSE`), add `images: false` so its cards use the logo instead (AMD's GPUOpen does this). Logos are 256×256 `.webp` with a transparent background (Apple's is `.png`: iOS Safari showed its WebP as a broken image, so use PNG for any logo that breaks there); [Simple Icons](https://simpleicons.org) has most brands as SVG, in their brand color. Each page load without cache makes one API request per feed, so keep `RATE_LIMIT_REQUESTS` well above the number of feeds.
 
 **Featured section:** above the grid, the 3 newest articles with a cover image, at most one per company (`web/src/core/pickFeatured.js`). It shows only on the home view (no company filter, no search), and those articles are left out of the grid below; Reels still goes through every article. Change `count` there to show more or fewer.
 
