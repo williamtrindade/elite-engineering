@@ -58,13 +58,15 @@ export class UI {
             const btn = document.createElement('button');
             const isActive = state.activeFilter === company.id;
 
-            btn.className = `company-filter w-10 h-10 cursor-pointer transition-all flex justify-center items-center ${isActive ? 'opacity-100 scale-110' : 'opacity-50'}`;
+            // White logos get .logo-white on the button, not the <img>: iOS Safari clips an image
+            // whose filter sits inside the button's own filter (grayscale), so it's one filter here
+            btn.className = `company-filter w-10 h-10 cursor-pointer transition-all flex justify-center items-center ${isActive ? 'opacity-100 scale-110' : 'opacity-50'} ${company.whiteLogo ? 'logo-white' : ''}`;
 
             if (isActive) {
                 btn.classList.add('active');
             }
 
-            btn.innerHTML = `<img src="static/${company.logo}" alt="${company.name}" title="${company.name}" class="w-full h-full object-contain ${company.whiteLogo ? 'logo-white' : ''}">`;
+            btn.innerHTML = `<img src="static/${company.logo}" alt="${company.name}" title="${company.name}" class="w-full h-full object-contain">`;
 
             btn.addEventListener('click', () => {
                 state.activeFilter = state.activeFilter === company.id ? null : company.id;

@@ -96,7 +96,7 @@ Secrets (a database or login key, later on) never go in the repository: use `.en
 new Feed({ url: 'https://openai.com/news/rss.xml', categories: ['Engineering', 'Research', 'Security'], limit: 30 })
 ```
 
-If the blog blocks its images on other sites (the browser logs `ERR_BLOCKED_BY_RESPONSE`), add `images: false` so its cards use the logo instead (AMD's GPUOpen does this). Logos are 256×256 `.webp` with a transparent background (Apple's is `.png`: iOS Safari showed its WebP as a broken image, so use PNG for any logo that breaks there); [Simple Icons](https://simpleicons.org) has most brands as SVG, in their brand color. Each page load without cache makes one API request per feed, so keep `RATE_LIMIT_REQUESTS` well above the number of feeds.
+If the blog blocks its images on other sites (the browser logs `ERR_BLOCKED_BY_RESPONSE`), add `images: false` so its cards use the logo instead (AMD's GPUOpen does this). Logos are 256×256 `.webp` with a transparent background; [Simple Icons](https://simpleicons.org) has most brands as SVG, in their brand color. Each page load without cache makes one API request per feed, so keep `RATE_LIMIT_REQUESTS` well above the number of feeds.
 
 **Featured section:** above the grid, the 3 newest articles with a cover image, at most one per company (`web/src/core/pickFeatured.js`). It shows only on the home view (no company filter, no search), and those articles are left out of the grid below; Reels still goes through every article. Change `count` there to show more or fewer.
 
@@ -210,7 +210,7 @@ The theme is `data-theme="light"` or `"dark"` on `<html>`.
 2. `web/src/ui/ColorScheme.js` runs the ☀️/🌙 button: it toggles the theme and saves the choice. Until the reader clicks it, the page follows the system as it changes.
 3. The markup is written for the dark theme (Tailwind's `text-white`, `text-gray-400`, `border-white/10`…). The light theme is one block at the end of `web/style.css` that remaps those classes, so templates don't need a variant per theme. When you use a new Tailwind color class, add its light version there.
 4. Image areas stay dark in both themes: card covers, the Featured cards and Reels, since their text sits on images.
-5. White logos would vanish on white, so companies with `whiteLogo: true` in `web/data/companies.js` get `.logo-white`, inverted on the light theme. Set it when you add a company whose logo is white.
+5. White logos would vanish on white, so companies with `whiteLogo: true` in `web/data/companies.js` get `.logo-white`, inverted on the light theme. Set it when you add a company whose logo is white. In the filter row the class goes on the button, not the image, so the invert joins the button's grayscale in one `filter`: iOS Safari draws only part of an image whose filter is nested inside another one.
 
 ### Sponsored slots
 

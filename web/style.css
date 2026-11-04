@@ -668,9 +668,22 @@ body.reels-open .back-to-top {
     opacity: 0.8;
 }
 
-/* White logos would vanish on white: show them dark (Company.whiteLogo) */
-[data-theme="light"] .logo-white {
+/* White logos would vanish on white: show them dark (Company.whiteLogo).
+   In the filter row the class is on the button, so invert joins its grayscale in a single
+   filter: iOS Safari draws only part of an image whose filter is nested inside another filter. */
+[data-theme="light"] img.logo-white {
     filter: invert(1);
+}
+[data-theme="light"] .company-filter.logo-white {
+    filter: invert(1) grayscale(100%) opacity(0.6);
+}
+[data-theme="light"] .company-filter.logo-white.active {
+    filter: invert(1);
+}
+@media (hover: hover) {
+    [data-theme="light"] .company-filter.logo-white:hover {
+        filter: invert(1);
+    }
 }
 
 [data-theme="light"] .loader {
