@@ -52,7 +52,7 @@ export class LoadArticles {
                 timestamp: new Date(item.pubDate).getTime(),
                 categories: item.categories,
                 excerpt: item.excerpt,
-                image: item.image,
+                image: feed.images ? item.image : '',
                 link: item.link,
                 pubDate: item.pubDate,
                 title: item.title,

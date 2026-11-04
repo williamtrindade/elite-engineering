@@ -1,5 +1,5 @@
 export class Feed {
-    constructor({author, description, image, link, title, url, articles, categories, limit}) {
+    constructor({author, description, image, link, title, url, articles, categories, limit, images = true}) {
         this.author = author;
         this.description = description;
         this.image = image;
@@ -9,6 +9,8 @@ export class Feed {
         // Optional: keep only these categories / at most this many items (for mixed feeds)
         this.categories = categories;
         this.limit = limit;
+        // false when the blog blocks its images on other sites, so cards use the logo instead
+        this.images = images;
         this.articles = articles || [];
     }
 }

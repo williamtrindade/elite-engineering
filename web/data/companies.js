@@ -154,6 +154,165 @@ export const companiesList = [
             // The whole blog history (~900 items), community posts included
             new Feed({ url: 'https://huggingface.co/blog/feed.xml', limit: 20 })
         ],
+    }),
+    new Company({
+        id: 'github',
+        name: 'GitHub',
+        color: '#e6edf3',
+        logo: 'github.webp',
+        feeds: [
+            new Feed({ url: 'https://github.blog/engineering/feed/' })
+        ],
+    }),
+    new Company({
+        id: 'shopify',
+        name: 'Shopify',
+        color: '#7ab55c',
+        logo: 'shopify.webp',
+        feeds: [
+            // The whole blog history (~400 items)
+            new Feed({ url: 'https://shopify.engineering/blog.atom', limit: 20 })
+        ],
+    }),
+    new Company({
+        id: 'pinterest',
+        name: 'Pinterest',
+        color: '#bd081c',
+        logo: 'pinterest.webp',
+        feeds: [
+            new Feed({ url: 'https://medium.com/feed/pinterest-engineering' })
+        ],
+    }),
+    new Company({
+        id: 'salesforce',
+        name: 'Salesforce',
+        color: '#00a1e0',
+        logo: 'salesforce.webp',
+        feeds: [
+            new Feed({ url: 'https://engineering.salesforce.com/feed/' })
+        ],
+    }),
+    new Company({
+        id: 'datadog',
+        name: 'Datadog',
+        color: '#8a5cd0',
+        logo: 'datadog.webp',
+        feeds: [
+            new Feed({ url: 'https://www.datadoghq.com/blog/engineering/index.xml', limit: 20 })
+        ],
+    }),
+    new Company({
+        id: 'amd',
+        name: 'AMD',
+        color: '#ed1c24',
+        logo: 'amd.webp',
+        feeds: [
+            // GPUOpen: AMD's developer blog (graphics, ML, performance). Its images only load on gpuopen.com
+            new Feed({ url: 'https://gpuopen.com/feed/', images: false })
+        ],
+    }),
+    new Company({
+        id: 'walmart',
+        name: 'Walmart',
+        color: '#0071ce',
+        logo: 'walmart.webp',
+        feeds: [
+            new Feed({ url: 'https://medium.com/feed/walmartglobaltech' })
+        ],
+    }),
+    new Company({
+        id: 'lyft',
+        name: 'Lyft',
+        color: '#ff00bf',
+        logo: 'lyft.webp',
+        feeds: [
+            new Feed({ url: 'https://eng.lyft.com/feed' })
+        ],
+    }),
+    new Company({
+        id: 'booking',
+        name: 'Booking.com',
+        color: '#2b5ba8',
+        logo: 'booking.webp',
+        feeds: [
+            new Feed({ url: 'https://medium.com/feed/booking-com-development' })
+        ],
+    }),
+    new Company({
+        id: 'etsy',
+        name: 'Etsy',
+        color: '#f16521',
+        logo: 'etsy.webp',
+        feeds: [
+            new Feed({ url: 'https://www.etsy.com/codeascraft/rss' })
+        ],
+    }),
+    new Company({
+        id: 'mozilla',
+        name: 'Mozilla',
+        color: '#e5e7eb',
+        logo: 'mozilla.webp',
+        feeds: [
+            new Feed({ url: 'https://hacks.mozilla.org/feed/' })
+        ],
+    }),
+    new Company({
+        id: 'yelp',
+        name: 'Yelp',
+        color: '#ff1a1a',
+        logo: 'yelp.webp',
+        feeds: [
+            new Feed({ url: 'https://engineeringblog.yelp.com/feed.xml' })
+        ],
+    }),
+    new Company({
+        id: 'canva',
+        name: 'Canva',
+        color: '#00c4cc',
+        logo: 'canva.webp',
+        feeds: [
+            new Feed({ url: 'https://www.canva.dev/blog/engineering/feed.xml' })
+        ],
+    }),
+    new Company({
+        id: 'grab',
+        name: 'Grab',
+        color: '#00b14f',
+        logo: 'grab.webp',
+        feeds: [
+            new Feed({ url: 'https://engineering.grab.com/feed.xml' })
+        ],
+    }),
+    new Company({
+        id: 'zalando',
+        name: 'Zalando',
+        color: '#ff6900',
+        logo: 'zalando.webp',
+        feeds: [
+            new Feed({ url: 'https://engineering.zalando.com/atom.xml', limit: 20 })
+        ],
+    }),
+    new Company({
+        id: 'nubank',
+        name: 'Nubank',
+        color: '#a14ce0',
+        logo: 'nubank.webp',
+        feeds: [
+            // The blog also has careers and culture posts
+            new Feed({
+                url: 'https://building.nubank.com/feed/',
+                categories: ['Engineering', 'Software Engineering', 'Data & Analytics', 'Data science & Machine Learning', 'AI Research']
+            })
+        ],
+    }),
+    new Company({
+        id: 'mercadolivre',
+        name: 'Mercado Livre',
+        color: '#ffe600',
+        logo: 'mercadolivre.webp',
+        feeds: [
+            new Feed({ url: 'https://medium.com/feed/mercadolibre-tech' })
+        ],
     })
 ];
 

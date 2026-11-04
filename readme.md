@@ -1,7 +1,7 @@
 ![img.png](img.png)
 > Curating the best engineering articles from industry-leading tech blogs.
 
-**Elite Engineering** aggregates the official RSS/Atom feeds of top tech companies (Meta, Apple, Cloudflare, Dropbox, GitHub…) into one fast, responsive page.
+**Elite Engineering** aggregates the official RSS/Atom feeds of 33 top tech companies (Meta, Apple, Google, Netflix, GitHub, Shopify, Datadog, Nubank…) into one fast, responsive page.
 
 - [Quick start](#quick-start) · [Commands](#commands) · [How it works](#how-it-works) · [Project structure](#project-structure) · [Configuration](#configuration)
 - [Common tasks](#common-tasks) · [Tests](#tests) · [Deployment](#deployment) · [Reference](#reference) ([sponsored slots](#sponsored-slots)) · [Known issues](#known-issues)
@@ -32,7 +32,7 @@ Open **http://localhost:8788**.
 ![generalArchitecture.svg](docs/diag/generalArchitecture.svg)
 
 - **`web/`**: front end in plain HTML, CSS and ES modules, with no build step. It parses the feeds in the browser and caches the articles in `localStorage` for **12 h**. It waits for the feeds for at most **3 s** and then shows what arrived: a slower feed is left out of that visit, keeps loading in the background, and shows up on the next one from the cache. The page never reorders itself after it shows. A shared Reels link (`?reel=`) waits for every feed instead, since the article may be in a slow one. It gives up on a feed the API doesn't answer within **10 s**.
-- **`api/`**: fetches the feeds for the browser, because blogs block cross-origin requests. It only serves feeds listed in `web/data/companies.js`, caches them for **30 min**, accepts only the site's origins, and allows **60 requests/min per IP**. A blog that doesn't answer within **8 s** gets a `502`, so it can't hold the request. It runs on Cloudflare Workers in production and on Node locally.
+- **`api/`**: fetches the feeds for the browser, because blogs block cross-origin requests. It only serves feeds listed in `web/data/companies.js`, caches them for **30 min**, accepts only the site's origins, and allows **120 requests/min per IP** (an uncached page load makes one per feed). A blog that doesn't answer within **8 s** gets a `502`, so it can't hold the request. It runs on Cloudflare Workers in production and on Node locally.
 - **Images** are not proxied: the browser downloads them straight from each blog ([details](#article-images)).
 
 ## Project structure
@@ -94,6 +94,8 @@ Secrets (a database or login key, later on) never go in the repository: use `.en
 ```js
 new Feed({ url: 'https://openai.com/news/rss.xml', categories: ['Engineering', 'Research', 'Security'], limit: 30 })
 ```
+
+If the blog blocks its images on other sites (the browser logs `ERR_BLOCKED_BY_RESPONSE`), add `images: false` so its cards use the logo instead (AMD's GPUOpen does this). Logos are 256×256 `.webp` with a transparent background; [Simple Icons](https://simpleicons.org) has most brands as SVG, in their brand color. Each page load without cache makes one API request per feed, so keep `RATE_LIMIT_REQUESTS` well above the number of feeds.
 
 **Featured section:** above the grid, the 3 newest articles with a cover image, at most one per company (`web/src/core/pickFeatured.js`). It shows only on the home view (no company filter, no search), and those articles are left out of the grid below; Reels still goes through every article. Change `count` there to show more or fewer.
 
@@ -182,7 +184,7 @@ Design notes and decisions: [`docs/superpowers/specs/2026-10-25-hexagonal-archit
    3. `<enclosure type="image/…">` or Atom `<link rel="enclosure">` (Cloudflare)
    4. the first `<img>` in the post HTML (Meta, Netflix, AWS, NVIDIA, Slack…), skipping `data:` URLs and images smaller than 50px
 
-   The URL is made absolute and upgraded to `https`. Some feeds have no images (OpenAI, Hugging Face, Spotify, Apple ML, Google Developers).
+   The URL is made absolute and upgraded to `https`. Some feeds have no images (OpenAI, Hugging Face, Spotify, Apple ML, Google Developers, Shopify, Yelp, Datadog), and AMD's are dropped on purpose (`images: false`, see [Common tasks](#common-tasks)).
 2. **Downloading the file** is done by the browser, straight from the blog, without the API. In the grid it uses `loading="lazy"`; in Reels it loads right away and preloads the next card. Caching follows each blog's `Cache-Control`. Files are not stored in `localStorage`, whose ~5 MB limit a few images would exceed.
 3. **Fallback:** while loading, or when there is no image or it fails (404, hotlink block, narrower than 120px), the card shows the company logo on its brand color.
 

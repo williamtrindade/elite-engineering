@@ -117,3 +117,12 @@ test('LoadArticles waits for every feed when waitMs is Infinity (a shared Reels 
 
     assert.deepEqual((await loading).map(a => a.title), ['slow', 'b', 'a']);
 });
+
+test('LoadArticles drops the images of a feed whose blog blocks them on other sites', async () => {
+    const feeds = { async fetch() { return { feed: {}, items: [{ ...item('a', '2026-01-01'), image: 'https://a/cover.jpg' }] }; } };
+    const blocked = [new Company({ id: 'a', name: 'A', feeds: [new Feed({ url: 'https://a/feed', images: false })] })];
+
+    const [article] = await new LoadArticles(feeds).execute(blocked);
+
+    assert.equal(article.image, '');
+});

@@ -16,7 +16,7 @@ How to work on this repository. What the project does and how it's built is in [
 - **Cloudflare is a plugin.** Cloudflare-specific code lives only in `api/platforms/cloudflare/`; the rest must work without it.
 - **No build step.** Plain ES modules in the browser and on Node 22+. Don't add bundlers, TypeScript or frameworks; ports are JSDoc `@typedef`s.
 - **Config:** API settings are environment variables, validated in `api/src/config.js` and listed in `.env.example` and `wrangler.jsonc` `vars` (keep the three in sync). Secrets go in `.env` or `wrangler secret`, never in the repository. `web/` is public: no secrets there.
-- **Feeds:** a feed must be listed in `web/data/companies.js`, which is also the API's allowlist. Adding a company also means a logo in `web/static/` (`.webp`) and its name in the `#about` footer of `web/index.html` (`test/web/seo.test.js` checks it).
+- **Feeds:** a feed must be listed in `web/data/companies.js`, which is also the API's allowlist. Adding a company also means a logo in `web/static/` (256×256 `.webp`) and its name in the `#about` footer of `web/index.html` (`test/web/seo.test.js` checks it). Check the feed first: it must be engineering content (not product news), recent, and parse in the browser. More feeds means more API requests per uncached page load, so keep `RATE_LIMIT_REQUESTS` well above the feed count.
 
 ## Tests
 
